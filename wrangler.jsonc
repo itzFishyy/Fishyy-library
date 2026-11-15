@@ -1,7 +1,7 @@
 // Tells Cloudflare what to publish: the finished site that
 // "npm run build" writes to the dist folder.
 {
-  "name": "fishyy",
+  "name": "fishirary",
   "compatibility_date": "2026-11-01",
   "assets": {
     "directory": "./dist",
