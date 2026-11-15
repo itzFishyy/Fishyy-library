@@ -1,124 +1,49 @@
 ---
 import type { GetStaticPaths } from 'astro';
-import { render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
-import WriteupRow from '../../components/WriteupRow.astro';
-import {
-  categoryUrl,
-  ctfUrl,
-  formatDate,
-  getRelated,
-  getWriteups,
-  readingTime,
-  tagUrl,
-  writeupUrl,
-} from '../../lib/writeups';
+import WriteupPage from '../../components/WriteupPage.astro';
+import { type Writeup, getHiddenDrafts, getRelated, getWriteups } from '../../lib/writeups';
 
 export const getStaticPaths = (async () => {
   const writeups = await getWriteups();
-  return writeups.map((entry, index) => ({
+  const published = writeups.map((entry, index) => ({
     params: { slug: entry.id },
     props: {
       entry,
-      newer: writeups[index - 1] ?? null,
-      older: writeups[index + 1] ?? null,
+      hidden: false,
+      newer: (writeups[index - 1] ?? null) as Writeup | null,
+      older: (writeups[index + 1] ?? null) as Writeup | null,
       related: getRelated(entry, writeups),
     },
   }));
+  // Hidden drafts keep their address but show only a notice (see getHiddenDrafts).
+  const hidden = (await getHiddenDrafts()).map((entry) => ({
+    params: { slug: entry.id },
+    props: {
+      entry,
+      hidden: true,
+      newer: null as Writeup | null,
+      older: null as Writeup | null,
+      related: [] as Writeup[],
+    },
+  }));
+  return [...published, ...hidden];
 }) satisfies GetStaticPaths;
 
-const { entry, newer, older, related } = Astro.props;
-const { title, ctf, category, tags, date, difficulty, description, draft } = entry.data;
-const { Content, headings } = await render(entry);
-const toc = headings.filter((heading) => heading.depth === 2 || heading.depth === 3);
+const { entry, hidden, newer, older, related } = Astro.props;
 ---
 
-<Base title={title} description={description}>
-  <div class:list={['container', 'post', { 'has-toc': toc.length > 0 }]}>
-    {
-      toc.length > 0 && (
-        <nav class="toc" aria-label="Table of contents">
-          <p class="toc-title">Contents</p>
-          <ol>
-            {toc.map((heading) => (
-              <li class={`depth-${heading.depth}`}>
-                <a href={`#${heading.slug}`}>{heading.text}</a>
-              </li>
-            ))}
-          </ol>
-        </nav>
-      )
-    }
-
-    <article>
-      <header class="post-header">
-        <p class="meta">
-          <a href={ctfUrl(ctf)}>{ctf}</a>
-          <a href={categoryUrl(category)}>{category}</a>
-          {difficulty && <span>{difficulty}</span>}
+{
+  hidden ? (
+    <Base title="Write-up not available" noindex>
+      <div class="container narrow">
+        <h1 class="page-title">This write-up isn't available</h1>
+        <p>
+          It isn't published right now. <a href="/">Back to the library</a>.
         </p>
-        <h1>
-          {title}
-          {draft && <span class="badge">Draft</span>}
-        </h1>
-        <p class="meta">
-          <time datetime={date.toISOString()}>{formatDate(date)}</time>
-          <span>{readingTime(entry)}</span>
-        </p>
-        {
-          tags.length > 0 && (
-            <ul class="tags">
-              {tags.map((tag) => (
-                <li>
-                  <a class="tag" href={tagUrl(tag)}>
-                    {tag}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          )
-        }
-      </header>
-
-      <div class="prose">
-        <Content />
       </div>
-
-      {
-        (newer || older) && (
-          <nav class="post-nav" aria-label="More write-ups">
-            {older ? (
-              <a class="prev" href={writeupUrl(older)}>
-                <small>← Older</small>
-                {older.data.title}
-              </a>
-            ) : (
-              <span />
-            )}
-            {newer && (
-              <a class="next" href={writeupUrl(newer)}>
-                <small>Newer →</small>
-                {newer.data.title}
-              </a>
-            )}
-          </nav>
-        )
-      }
-
-      {
-        related.length > 0 && (
-          <section class="related">
-            <h2 class="section-title">Related write-ups</h2>
-            <ul class="row-list">
-              {related.map((other) => (
-                <li>
-                  <WriteupRow entry={other} />
-                </li>
-              ))}
-            </ul>
-          </section>
-        )
-      }
-    </article>
-  </div>
-</Base>
+    </Base>
+  ) : (
+    <WriteupPage entry={entry} newer={newer} older={older} related={related} />
+  )
+}

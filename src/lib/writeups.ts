@@ -19,6 +19,18 @@ export async function getWriteups(): Promise<Writeup[]> {
   );
 }
 
+/**
+ * Drafts on the published site. They are left out of every list, but each
+ * still gets a page saying it is not available. Cloudflare keeps serving a
+ * removed page from its saved copy for days, while a changed page updates
+ * at once, so replacing the page is what takes a write-up down right away.
+ * In the preview on your computer drafts are shown in full, so this is empty.
+ */
+export async function getHiddenDrafts(): Promise<Writeup[]> {
+  if (!import.meta.env.PROD) return [];
+  return getCollection('writeups', ({ data }) => data.draft);
+}
+
 /** Turns "CSCTF 2026" into "csctf-2026" for use in URLs. */
 export function slugify(text: string): string {
   const slug = text
