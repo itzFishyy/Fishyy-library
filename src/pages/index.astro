@@ -49,9 +49,13 @@ const total = writeups.length;
       </button>
 
       <div class="hero-actions">
-        <a class="scroll-hint" href="#writeups">
-          Browse all {total} {total === 1 ? 'write-up' : 'write-ups'} ↓
-        </a>
+        {
+          total > 0 && (
+            <a class="scroll-hint" href="#writeups">
+              Browse all {total} {total === 1 ? 'write-up' : 'write-ups'} ↓
+            </a>
+          )
+        }
         {
           site.links.length > 0 && (
             <div class="hero-links">

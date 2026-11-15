@@ -13,8 +13,9 @@ const categories = groupByCategory(writeups).sort((a, b) => b.entries.length - a
   <div class="container narrow">
     <h1 class="page-title">About {site.author}</h1>
     <p class="page-subtitle">
-      {writeups.length} {writeups.length === 1 ? 'write-up' : 'write-ups'} from {ctfCount}
-      {ctfCount === 1 ? 'CTF' : 'CTFs'}
+      {
+        `${writeups.length} ${writeups.length === 1 ? 'write-up' : 'write-ups'} from ${ctfCount} ${ctfCount === 1 ? 'CTF' : 'CTFs'}`
+      }
     </p>
 
     {site.about.map((paragraph) => <p>{paragraph}</p>)}
