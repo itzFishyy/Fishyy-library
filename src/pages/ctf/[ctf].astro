@@ -1,0 +1,14 @@
+---
+import type { GetStaticPaths } from 'astro';
+import GroupPage from '../../components/GroupPage.astro';
+import { getWriteups, groupByCtf } from '../../lib/writeups';
+
+export const getStaticPaths = (async () => {
+  return groupByCtf(await getWriteups()).map((group) => ({
+    params: { ctf: group.slug },
+    props: { group },
+  }));
+}) satisfies GetStaticPaths;
+---
+
+<GroupPage kind="CTF" group={Astro.props.group} showCtf={false} />

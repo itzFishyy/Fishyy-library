@@ -1,0 +1,10 @@
+// Tells Cloudflare what to publish: the finished site that
+// "npm run build" writes to the dist folder.
+{
+  "name": "fishirary",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "404-page"
+  }
+}

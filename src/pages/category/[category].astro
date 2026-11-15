@@ -1,0 +1,14 @@
+---
+import type { GetStaticPaths } from 'astro';
+import GroupPage from '../../components/GroupPage.astro';
+import { getWriteups, groupByCategory } from '../../lib/writeups';
+
+export const getStaticPaths = (async () => {
+  return groupByCategory(await getWriteups()).map((group) => ({
+    params: { category: group.slug },
+    props: { group },
+  }));
+}) satisfies GetStaticPaths;
+---
+
+<GroupPage kind="Category" group={Astro.props.group} />

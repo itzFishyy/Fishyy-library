@@ -1,0 +1,149 @@
+---
+import Base from '../layouts/Base.astro';
+import TerminalCard from '../components/TerminalCard.astro';
+import WriteupRow from '../components/WriteupRow.astro';
+import { getWriteups, groupByCtf } from '../lib/writeups';
+import { home, site, terminal } from '../site.config';
+
+const writeups = await getWriteups();
+const latest = writeups[0];
+const groups = groupByCtf(writeups);
+const total = writeups.length;
+---
+
+<Base>
+  <section class:list={['hero', terminal.show ? 'has-terminal' : 'centered']}>
+    <div>
+      {
+        home.status && (
+          <p class="hero-status">
+            <span class="status-dot" aria-hidden="true" />
+            {home.status}
+          </p>
+        )
+      }
+      {home.greeting && <p class="hero-kicker">{home.greeting}</p>}
+      <h1>{home.heading}</h1>
+      {
+        home.roles.length > 0 && (
+          <p class="hero-role">
+            <span class="prompt" aria-hidden="true">
+              &gt;
+            </span>
+            <span data-typed data-roles={JSON.stringify(home.roles)}>
+              {home.roles[0]}
+            </span>
+            <span class="cursor" aria-hidden="true" />
+          </p>
+        )
+      }
+      {home.intro && <p class="hero-intro">{home.intro}</p>}
+
+      <button class="search-trigger" type="button" data-search-open>
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="7"></circle>
+          <path d="M20 20l-3.5-3.5"></path>
+        </svg>
+        <span>Search write-ups, tags, CTFs…</span>
+        <kbd>Ctrl K</kbd>
+      </button>
+
+      <div class="hero-actions">
+        <a class="scroll-hint" href="#writeups">
+          Browse all {total} {total === 1 ? 'write-up' : 'write-ups'} ↓
+        </a>
+        {
+          site.links.length > 0 && (
+            <div class="hero-links">
+              {site.links.map((link) => (
+                <a href={link.url} rel="noopener">
+                  {link.label}
+                </a>
+              ))}
+            </div>
+          )
+        }
+      </div>
+    </div>
+
+    {terminal.show && <TerminalCard />}
+  </section>
+
+  <section id="writeups" class="container">
+    {
+      latest && (
+        <div class="featured">
+          <p class="featured-label">Latest write-up</p>
+          <WriteupRow entry={latest} />
+        </div>
+      )
+    }
+
+    <h2 class="section-title">All write-ups</h2>
+
+    {total === 0 && <p class="empty">No write-ups yet.</p>}
+
+    {
+      groups.map((group) => (
+        <details class="group" open>
+          <summary>
+            {group.label}
+            <span class="count">{group.entries.length}</span>
+          </summary>
+          <ul class="row-list">
+            {group.entries.map((entry) => (
+              <li>
+                <WriteupRow
+                  entry={entry}
+                  showCtf={false}
+                  badge={entry.id === latest?.id ? 'Latest' : undefined}
+                />
+              </li>
+            ))}
+          </ul>
+        </details>
+      ))
+    }
+  </section>
+</Base>
+
+<script>
+  // Types the roles out one after another. With "reduce motion" turned on
+  // in the system settings, the first role is simply shown.
+  const typed = document.querySelector<HTMLElement>('[data-typed]');
+  const roles = (JSON.parse(typed?.dataset.roles ?? '[]') as string[]).filter(Boolean);
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // A single role has nothing to cycle to, so it just stays.
+  if (typed && roles.length > 1 && !reduceMotion) {
+    let role = 0;
+    let length = roles[0].length;
+    let deleting = true;
+
+    const step = () => {
+      let delay: number;
+      if (deleting) {
+        length -= 1;
+        delay = 45;
+        if (length === 0) {
+          // Fully erased: move on to the next role and start typing it.
+          deleting = false;
+          role = (role + 1) % roles.length;
+          delay = 350;
+        }
+      } else {
+        length += 1;
+        delay = 90;
+        if (length === roles[role].length) {
+          // Fully typed: pause so it can be read, then erase.
+          deleting = true;
+          delay = 2200;
+        }
+      }
+      typed.textContent = roles[role].slice(0, length);
+      window.setTimeout(step, delay);
+    };
+
+    window.setTimeout(step, 2200);
+  }
+</script>

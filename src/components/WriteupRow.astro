@@ -1,0 +1,48 @@
+---
+import {
+  type Writeup,
+  categoryUrl,
+  ctfUrl,
+  formatDate,
+  tagUrl,
+  writeupUrl,
+} from '../lib/writeups';
+
+interface Props {
+  entry: Writeup;
+  /** Hide the CTF name when the surrounding list is already about one CTF. */
+  showCtf?: boolean;
+  /** Small label next to the title, e.g. "Latest". */
+  badge?: string;
+}
+
+const { entry, showCtf = true, badge } = Astro.props;
+const { title, ctf, category, tags, date, difficulty, description } = entry.data;
+---
+
+<article class="row">
+  <h3 class="row-title">
+    <a href={writeupUrl(entry)}>{title}</a>
+    {badge && <span class="badge">{badge}</span>}
+  </h3>
+  {description && <p class="row-desc muted">{description}</p>}
+  <p class="meta">
+    <time datetime={date.toISOString()}>{formatDate(date)}</time>
+    {showCtf && <a href={ctfUrl(ctf)}>{ctf}</a>}
+    <a href={categoryUrl(category)}>{category}</a>
+    {difficulty && <span>{difficulty}</span>}
+  </p>
+  {
+    tags.length > 0 && (
+      <ul class="tags">
+        {tags.map((tag) => (
+          <li>
+            <a class="tag" href={tagUrl(tag)}>
+              {tag}
+            </a>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</article>

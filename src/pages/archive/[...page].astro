@@ -1,0 +1,81 @@
+---
+import type { GetStaticPaths, Page } from 'astro';
+import Base from '../../layouts/Base.astro';
+import {
+  type Writeup,
+  categoryUrl,
+  ctfUrl,
+  formatDate,
+  getWriteups,
+  writeupUrl,
+} from '../../lib/writeups';
+import { site } from '../../site.config';
+
+export const getStaticPaths = (async ({ paginate }) => {
+  return paginate(await getWriteups(), { pageSize: site.archivePageSize });
+}) satisfies GetStaticPaths;
+
+const page = Astro.props.page as Page<Writeup>;
+---
+
+<Base title="Archive">
+  <div class="container">
+    <h1 class="page-title">Archive</h1>
+    <p class="page-subtitle">
+      {page.total} {page.total === 1 ? 'write-up' : 'write-ups'} · page {page.currentPage} of {
+        page.lastPage
+      }
+    </p>
+
+    {
+      page.total === 0 ? (
+        <p class="empty">No write-ups yet.</p>
+      ) : (
+        <div class="table-wrap">
+          <table class="archive-table">
+            <thead>
+              <tr>
+                <th scope="col">Date</th>
+                <th scope="col">Write-up</th>
+                <th scope="col">CTF</th>
+                <th scope="col">Category</th>
+              </tr>
+            </thead>
+            <tbody>
+              {page.data.map((entry) => (
+                <tr>
+                  <td>
+                    <time datetime={entry.data.date.toISOString()}>
+                      {formatDate(entry.data.date)}
+                    </time>
+                  </td>
+                  <td>
+                    <a href={writeupUrl(entry)}>{entry.data.title}</a>
+                  </td>
+                  <td>
+                    <a href={ctfUrl(entry.data.ctf)}>{entry.data.ctf}</a>
+                  </td>
+                  <td>
+                    <a href={categoryUrl(entry.data.category)}>{entry.data.category}</a>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )
+    }
+
+    {
+      page.lastPage > 1 && (
+        <nav class="pagination" aria-label="Archive pages">
+          <span>{page.url.prev && <a href={page.url.prev}>← Newer</a>}</span>
+          <span class="muted">
+            Page {page.currentPage} of {page.lastPage}
+          </span>
+          <span>{page.url.next && <a href={page.url.next}>Older →</a>}</span>
+        </nav>
+      )
+    }
+  </div>
+</Base>

@@ -1,0 +1,70 @@
+---
+import { site, terminal } from '../site.config';
+---
+
+<aside class="terminal" aria-label={`About ${site.author}`}>
+  <div class="terminal-bar" aria-hidden="true">
+    <span class="terminal-dot" style="background:#ff5f57"></span>
+    <span class="terminal-dot" style="background:#febc2e"></span>
+    <span class="terminal-dot" style="background:#28c840"></span>
+    <span class="terminal-title">{terminal.title}</span>
+  </div>
+
+  <div class="terminal-body">
+    <div class="terminal-profile">
+      {
+        terminal.avatar ? (
+          <img class="terminal-avatar" src={terminal.avatar} alt="" width="56" height="56" />
+        ) : (
+          <span class="terminal-avatar" aria-hidden="true">
+            {site.author.charAt(0)}
+          </span>
+        )
+      }
+      <div>
+        <p class="terminal-name">{site.author}</p>
+        {terminal.handle && <p class="terminal-handle">{terminal.handle}</p>}
+      </div>
+    </div>
+
+    {
+      terminal.whoami && (
+        <>
+          <p class="terminal-line">whoami</p>
+          <p class="terminal-output">{terminal.whoami}</p>
+        </>
+      )
+    }
+
+    {
+      terminal.info.length > 0 && (
+        <>
+          <p class="terminal-line">cat ~/about.txt</p>
+          <dl class="terminal-info">
+            {terminal.info.map((row) => (
+              <>
+                <dt>{row.label}</dt>
+                <dd>{row.value}</dd>
+              </>
+            ))}
+          </dl>
+        </>
+      )
+    }
+
+    {
+      terminal.focus.length > 0 && (
+        <>
+          <p class="terminal-line">ls ~/focus</p>
+          <ul class="terminal-focus">
+            {terminal.focus.map((topic) => (
+              <li>{topic}/</li>
+            ))}
+          </ul>
+        </>
+      )
+    }
+
+    <p class="terminal-end" aria-hidden="true"><span class="cursor"></span></p>
+  </div>
+</aside>

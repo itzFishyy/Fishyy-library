@@ -1,0 +1,37 @@
+---
+// The list of friends, grouped by CTF role. Edit the people in src/data/friends.ts.
+import { friends, type Friend } from '../data/friends';
+
+// Group by role, keeping the order roles first appear in the list.
+const roles = new Map<string, { label: string; members: Friend[] }>();
+for (const friend of friends) {
+  const key = friend.role.trim().toLowerCase();
+  const role = roles.get(key) ?? { label: friend.role.trim(), members: [] };
+  role.members.push(friend);
+  roles.set(key, role);
+}
+---
+
+{friends.length === 0 && <p class="empty">Have none yet :(</p>}
+
+{
+  [...roles.values()].map((role) => (
+    <section>
+      <h3 class="friend-role">{role.label}</h3>
+      <ul class="friend-list">
+        {role.members.map((friend) => (
+          <li class="friend">
+            {friend.url ? (
+              <a class="friend-name" href={friend.url} rel="noopener">
+                {friend.name}
+              </a>
+            ) : (
+              <span class="friend-name">{friend.name}</span>
+            )}
+            {friend.note && <p class="friend-note">{friend.note}</p>}
+          </li>
+        ))}
+      </ul>
+    </section>
+  ))
+}

@@ -1,0 +1,60 @@
+---
+import Base from '../layouts/Base.astro';
+import FriendsList from '../components/FriendsList.astro';
+import { categoryUrl, getWriteups, groupByCategory, groupByCtf } from '../lib/writeups';
+import { site } from '../site.config';
+
+const writeups = await getWriteups();
+const ctfCount = groupByCtf(writeups).length;
+const categories = groupByCategory(writeups).sort((a, b) => b.entries.length - a.entries.length);
+---
+
+<Base title="About">
+  <div class="container narrow">
+    <h1 class="page-title">About {site.author}</h1>
+    <p class="page-subtitle">
+      {writeups.length} {writeups.length === 1 ? 'write-up' : 'write-ups'} from {ctfCount}
+      {ctfCount === 1 ? 'CTF' : 'CTFs'}
+    </p>
+
+    {site.about.map((paragraph) => <p>{paragraph}</p>)}
+
+    {
+      site.links.length > 0 && (
+        <>
+          <h2>Find me</h2>
+          <ul>
+            {site.links.map((link) => (
+              <li>
+                <a href={link.url} rel="noopener">
+                  {link.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </>
+      )
+    }
+
+    {
+      categories.length > 0 && (
+        <>
+          <h2>Categories</h2>
+          <ul class="tags">
+            {categories.map((category) => (
+              <li>
+                <a class="tag" href={categoryUrl(category.label)}>
+                  {category.label} ({category.entries.length})
+                </a>
+              </li>
+            ))}
+          </ul>
+        </>
+      )
+    }
+
+    <h2 id="friends">Friends</h2>
+    <p class="muted">Teammates and friends, by CTF role.</p>
+    <FriendsList />
+  </div>
+</Base>

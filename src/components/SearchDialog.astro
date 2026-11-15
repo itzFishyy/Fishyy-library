@@ -1,0 +1,222 @@
+---
+// The search pop-up. It is on every page: any element with the attribute
+// `data-search-open` opens it, and so does Ctrl+K (Cmd+K on a Mac).
+---
+
+<dialog id="search-dialog" class="search-dialog" aria-label="Search write-ups">
+  <div class="search-head">
+    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+      <circle cx="11" cy="11" r="7"></circle>
+      <path d="M20 20l-3.5-3.5"></path>
+    </svg>
+    <input
+      id="search-dialog-input"
+      type="text"
+      placeholder="Search write-ups, tags, CTFs, content…"
+      aria-label="Search write-ups"
+      aria-controls="search-results"
+      autocomplete="off"
+      spellcheck="false"
+    />
+    <button class="search-close" type="button" data-search-close aria-label="Close search">
+      <kbd>Esc</kbd>
+    </button>
+  </div>
+
+  <div class="search-body">
+    <p id="search-label" class="search-label">Latest write-ups</p>
+    <ul id="search-results" class="search-results" role="listbox" aria-labelledby="search-label"></ul>
+    <p id="search-empty" class="search-empty" hidden>No write-ups match.</p>
+  </div>
+
+  <div class="search-foot">
+    <div class="search-keys">
+      <kbd>↑</kbd><kbd>↓</kbd><span>select</span>
+      <kbd>↵</kbd><span>open</span>
+    </div>
+    <span id="search-count" aria-live="polite"></span>
+  </div>
+</dialog>
+
+<script>
+  interface Item {
+    title: string;
+    url: string;
+    date: string;
+    dateText: string;
+    ctf: string;
+    category: string;
+    tags: string[];
+    description: string;
+    text: string;
+  }
+
+  interface Indexed extends Item {
+    titleText: string;
+    metaText: string;
+  }
+
+  const LATEST_COUNT = 5;
+  const MAX_SHOWN = 30;
+
+  const dialog = document.querySelector<HTMLDialogElement>('#search-dialog')!;
+  const input = document.querySelector<HTMLInputElement>('#search-dialog-input')!;
+  const list = document.querySelector<HTMLUListElement>('#search-results')!;
+  const label = document.querySelector<HTMLElement>('#search-label')!;
+  const empty = document.querySelector<HTMLElement>('#search-empty')!;
+  const count = document.querySelector<HTMLElement>('#search-count')!;
+
+  let index: Promise<Indexed[]> | null = null;
+  let shown: Indexed[] = [];
+  let selected = 0;
+
+  /** The list of write-ups is downloaded once, the first time the pop-up opens. */
+  function loadIndex(): Promise<Indexed[]> {
+    index ??= fetch('/search.json')
+      .then((response) => {
+        if (!response.ok) throw new Error(`search.json: ${response.status}`);
+        return response.json() as Promise<Item[]>;
+      })
+      .then((items) =>
+        items.map((item) => ({
+          ...item,
+          titleText: item.title.toLowerCase(),
+          metaText: [item.ctf, item.category, ...item.tags, item.description]
+            .join(' ')
+            .toLowerCase(),
+        })),
+      )
+      .catch((error) => {
+        index = null;
+        throw error;
+      });
+    return index;
+  }
+
+  /** Every word typed must appear somewhere; title matches count most, body text least. */
+  function find(items: Indexed[], query: string): Indexed[] {
+    const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
+    if (terms.length === 0) return items.slice(0, LATEST_COUNT);
+
+    const scored: { item: Indexed; score: number }[] = [];
+    for (const item of items) {
+      let score = 0;
+      let all = true;
+      for (const term of terms) {
+        if (item.titleText.includes(term)) score += 10;
+        else if (item.metaText.includes(term)) score += 5;
+        else if (item.text.includes(term)) score += 1;
+        else {
+          all = false;
+          break;
+        }
+      }
+      if (all) scored.push({ item, score });
+    }
+    // Items arrive newest first and the sort is stable, so ties stay newest first.
+    return scored.sort((a, b) => b.score - a.score).map(({ item }) => item);
+  }
+
+  function line(className: string, text: string): HTMLParagraphElement {
+    const p = document.createElement('p');
+    p.className = className;
+    p.textContent = text;
+    return p;
+  }
+
+  function select(next: number, scroll = true) {
+    const options = list.children;
+    if (options.length === 0) return;
+    selected = (next + options.length) % options.length;
+    for (let i = 0; i < options.length; i++) {
+      options[i].setAttribute('aria-selected', String(i === selected));
+    }
+    if (scroll) options[selected].scrollIntoView({ block: 'nearest' });
+  }
+
+  async function render() {
+    const query = input.value.trim();
+    let matches: Indexed[];
+    try {
+      matches = find(await loadIndex(), query);
+    } catch {
+      list.replaceChildren();
+      empty.textContent = 'Search could not be loaded. Try again in a moment.';
+      empty.hidden = false;
+      count.textContent = '';
+      return;
+    }
+    // Ignore this answer if the text changed while the list was loading.
+    if (query !== input.value.trim()) return;
+
+    shown = matches.slice(0, MAX_SHOWN);
+    label.textContent = query ? 'Results' : 'Latest write-ups';
+    label.hidden = shown.length === 0;
+    empty.textContent = query ? 'No write-ups match.' : 'No write-ups yet.';
+    empty.hidden = shown.length > 0;
+    count.textContent = `${matches.length} ${matches.length === 1 ? 'result' : 'results'}`;
+
+    list.replaceChildren(
+      ...shown.map((item, i) => {
+        const li = document.createElement('li');
+        li.className = 'search-result';
+        li.setAttribute('role', 'option');
+        const link = document.createElement('a');
+        link.href = item.url;
+        link.tabIndex = -1;
+        link.append(
+          line('search-result-title', item.title),
+          line('search-result-meta', [item.dateText, item.category, item.ctf].join(' · ')),
+        );
+        if (item.description) link.append(line('search-result-desc', item.description));
+        li.append(link);
+        li.addEventListener('mousemove', () => select(i, false));
+        return li;
+      }),
+    );
+    select(0);
+  }
+
+  function open() {
+    if (dialog.open) return;
+    input.value = '';
+    dialog.showModal();
+    input.focus();
+    render();
+  }
+
+  input.addEventListener('input', render);
+
+  input.addEventListener('keydown', (event) => {
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      select(selected + 1);
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      select(selected - 1);
+    } else if (event.key === 'Enter') {
+      event.preventDefault();
+      const item = shown[selected];
+      if (item) window.location.href = item.url;
+    }
+  });
+
+  // A click on the dimmed area around the box closes it.
+  dialog.addEventListener('click', (event) => {
+    if (event.target === dialog) dialog.close();
+  });
+
+  document.addEventListener('click', (event) => {
+    const target = event.target instanceof Element ? event.target : null;
+    if (target?.closest('[data-search-open]')) open();
+    else if (target?.closest('[data-search-close]')) dialog.close();
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+      event.preventDefault();
+      if (dialog.open) dialog.close();
+      else open();
+    }
+  });
+</script>

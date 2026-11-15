@@ -1,0 +1,33 @@
+---
+// Shared page for "all write-ups from one CTF / in one category / with one tag".
+import Base from '../layouts/Base.astro';
+import WriteupRow from './WriteupRow.astro';
+import type { Group } from '../lib/writeups';
+
+interface Props {
+  /** "CTF", "Category" or "Tag". */
+  kind: string;
+  group: Group;
+  showCtf?: boolean;
+}
+
+const { kind, group, showCtf = true } = Astro.props;
+const total = group.entries.length;
+---
+
+<Base title={`${kind}: ${group.label}`}>
+  <div class="container narrow">
+    <p class="muted">{kind}</p>
+    <h1 class="page-title">{group.label}</h1>
+    <p class="page-subtitle">{total} {total === 1 ? 'write-up' : 'write-ups'}</p>
+    <ul class="row-list">
+      {
+        group.entries.map((entry) => (
+          <li>
+            <WriteupRow entry={entry} showCtf={showCtf} />
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</Base>
