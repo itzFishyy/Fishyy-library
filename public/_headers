@@ -1,0 +1,11 @@
+# Cloudflare Pages reads this file.
+#
+# Pages are never served from a saved copy, so a write-up that is hidden
+# or deleted disappears right away instead of lingering for days.
+/*
+  Cache-Control: public, max-age=0, s-maxage=0, must-revalidate
+
+# Styles and scripts have a unique name per version, so they can be kept.
+/_astro/*
+  ! Cache-Control
+  Cache-Control: public, max-age=31536000, immutable
