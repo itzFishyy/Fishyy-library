@@ -78,7 +78,7 @@ export const terminal = {
   focus: ['web', 'crypto', 'forensics'],
 };
 
-/** The "????.WIP" page. */
+/** The "????" page. */
 export const wip = {
   /** The big line. */
   heading: 'No one is here but us, chicken!',
@@ -95,5 +95,5 @@ export const nav: { label: string; href?: string }[] = [
   { label: 'Home', href: '/' },
   { label: 'About', href: '/about/' },
   { label: 'Archive', href: '/archive/' },
-  { label: '????.WIP', href: '/wip/' },
+  { label: '????', href: '/wip/' },
 ];
