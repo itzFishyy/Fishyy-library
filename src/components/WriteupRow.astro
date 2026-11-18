@@ -2,22 +2,22 @@
 import {
   type Writeup,
   categoryUrl,
-  ctfUrl,
   formatDate,
+  sourceUrl,
   tagUrl,
   writeupUrl,
 } from '../lib/writeups';
 
 interface Props {
   entry: Writeup;
-  /** Hide the CTF name when the surrounding list is already about one CTF. */
-  showCtf?: boolean;
+  /** Hide the source when the surrounding list is already grouped by source. */
+  showSource?: boolean;
   /** Small label next to the title, e.g. "Latest". */
   badge?: string;
 }
 
-const { entry, showCtf = true, badge } = Astro.props;
-const { title, ctf, category, tags, date, difficulty, description } = entry.data;
+const { entry, showSource = true, badge } = Astro.props;
+const { title, source, category, tags, date, difficulty, description } = entry.data;
 ---
 
 <article class="row">
@@ -28,7 +28,7 @@ const { title, ctf, category, tags, date, difficulty, description } = entry.data
   {description && <p class="row-desc muted">{description}</p>}
   <p class="meta">
     <time datetime={date.toISOString()}>{formatDate(date)}</time>
-    {showCtf && <a href={ctfUrl(ctf)}>{ctf}</a>}
+    {showSource && <a href={sourceUrl(source)}>{source}</a>}
     <a href={categoryUrl(category)}>{category}</a>
     {difficulty && <span>{difficulty}</span>}
   </p>
