@@ -1,0 +1,52 @@
+---
+import Base from '../../layouts/Base.astro';
+import WriteupRow from '../../components/WriteupRow.astro';
+import { getWriteups } from '../../lib/writeups';
+
+const writeups = await getWriteups();
+const competitions = writeups.filter((entry) => entry.data.type === 'competition');
+const learning = writeups.filter((entry) => entry.data.type === 'learning');
+---
+
+<Base title="Archive">
+  <div class="container">
+    <h1 class="page-title">Archive</h1>
+    <p class="page-subtitle">{writeups.length} {writeups.length === 1 ? 'write-up' : 'write-ups'}</p>
+
+    {writeups.length === 0 && <p class="empty">No write-ups yet.</p>}
+
+    <section class="archive-section" aria-labelledby="competitions-title">
+      <div class="archive-section-heading">
+        <div>
+          <p class="archive-kicker">Organised events</p>
+          <h2 id="competitions-title" class="section-title">Competitions <span class="count">({competitions.length})</span></h2>
+        </div>
+        <p class="muted archive-description">Challenges from CTF events and competitions.</p>
+      </div>
+      {
+        competitions.length > 0 ? (
+          <ul class="row-list archive-list">
+            {competitions.map((entry) => <li><WriteupRow entry={entry} /></li>)}
+          </ul>
+        ) : <p class="empty archive-empty">No competition write-ups yet.</p>
+      }
+    </section>
+
+    <section class="archive-section" aria-labelledby="learning-title">
+      <div class="archive-section-heading">
+        <div>
+          <p class="archive-kicker">Independent practice</p>
+          <h2 id="learning-title" class="section-title">Learning &amp; Practice <span class="count">({learning.length})</span></h2>
+        </div>
+        <p class="muted archive-description">Wargames, guided labs and other hands-on learning challenges.</p>
+      </div>
+      {
+        learning.length > 0 ? (
+          <ul class="row-list archive-list">
+            {learning.map((entry) => <li><WriteupRow entry={entry} /></li>)}
+          </ul>
+        ) : <p class="empty archive-empty">No learning write-ups yet.</p>
+      }
+    </section>
+  </div>
+</Base>
