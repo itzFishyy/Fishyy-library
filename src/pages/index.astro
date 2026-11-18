@@ -2,12 +2,12 @@
 import Base from '../layouts/Base.astro';
 import TerminalCard from '../components/TerminalCard.astro';
 import WriteupRow from '../components/WriteupRow.astro';
-import { getWriteups, groupByCtf } from '../lib/writeups';
+import { getWriteups, groupBySource } from '../lib/writeups';
 import { home, site, terminal } from '../site.config';
 
 const writeups = await getWriteups();
 const latest = writeups[0];
-const groups = groupByCtf(writeups);
+const groups = groupBySource(writeups);
 const total = writeups.length;
 ---
 
@@ -27,12 +27,8 @@ const total = writeups.length;
       {
         home.roles.length > 0 && (
           <p class="hero-role">
-            <span class="prompt" aria-hidden="true">
-              &gt;
-            </span>
-            <span data-typed data-roles={JSON.stringify(home.roles)}>
-              {home.roles[0]}
-            </span>
+            <span class="prompt" aria-hidden="true">&gt;</span>
+            <span data-typed data-roles={JSON.stringify(home.roles)}>{home.roles[0]}</span>
             <span class="cursor" aria-hidden="true" />
           </p>
         )
@@ -44,7 +40,7 @@ const total = writeups.length;
           <circle cx="11" cy="11" r="7"></circle>
           <path d="M20 20l-3.5-3.5"></path>
         </svg>
-        <span>Search write-ups, tags, CTFs…</span>
+        <span>Search write-ups, sources, tags…</span>
         <kbd>Ctrl K</kbd>
       </button>
 
@@ -59,11 +55,7 @@ const total = writeups.length;
         {
           site.links.length > 0 && (
             <div class="hero-links">
-              {site.links.map((link) => (
-                <a href={link.url} rel="noopener">
-                  {link.label}
-                </a>
-              ))}
+              {site.links.map((link) => <a href={link.url} rel="noopener">{link.label}</a>)}
             </div>
           )
         }
@@ -84,7 +76,6 @@ const total = writeups.length;
     }
 
     <h2 class="section-title">All write-ups</h2>
-
     {total === 0 && <p class="empty">No write-ups yet.</p>}
 
     {
@@ -99,7 +90,7 @@ const total = writeups.length;
               <li>
                 <WriteupRow
                   entry={entry}
-                  showCtf={false}
+                  showSource={false}
                   badge={entry.id === latest?.id ? 'Latest' : undefined}
                 />
               </li>
@@ -112,13 +103,10 @@ const total = writeups.length;
 </Base>
 
 <script>
-  // Types the roles out one after another. With "reduce motion" turned on
-  // in the system settings, the first role is simply shown.
   const typed = document.querySelector<HTMLElement>('[data-typed]');
   const roles = (JSON.parse(typed?.dataset.roles ?? '[]') as string[]).filter(Boolean);
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // A single role has nothing to cycle to, so it just stays.
   if (typed && roles.length > 1 && !reduceMotion) {
     let role = 0;
     let length = roles[0].length;
@@ -130,7 +118,6 @@ const total = writeups.length;
         length -= 1;
         delay = 45;
         if (length === 0) {
-          // Fully erased: move on to the next role and start typing it.
           deleting = false;
           role = (role + 1) % roles.length;
           delay = 350;
@@ -139,7 +126,6 @@ const total = writeups.length;
         length += 1;
         delay = 90;
         if (length === roles[role].length) {
-          // Fully typed: pause so it can be read, then erase.
           deleting = true;
           delay = 2200;
         }
