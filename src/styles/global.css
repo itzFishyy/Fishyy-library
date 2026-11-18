@@ -831,7 +831,53 @@ kbd {
   color: var(--color-muted);
 }
 
+/* Archive sections */
+
+.archive-section {
+  margin-top: 2.5rem;
+}
+
+.archive-section-heading {
+  margin-bottom: 0.75rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: 0.25rem 1.5rem;
+}
+
+.archive-section-heading .section-title {
+  margin-bottom: 0;
+}
+
+.archive-kicker {
+  margin: 0 0 0.2rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.archive-description {
+  margin: 0 0 0.15rem;
+  font-size: 0.9rem;
+}
+
+.archive-list {
+  padding: 0 1rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.archive-empty {
+  padding: 1.25rem;
+}
+
 /* Archive table */
+
+
 
 .table-wrap {
   overflow-x: auto;
