@@ -21,16 +21,21 @@ Every write-up starts with this header:
 ```yaml
 ---
 title: Challenge name
-ctf: Name of the CTF
-category: web
-tags: [JWT, Auth Bypass]
+type: learning
+source: OverTheWire
+category: linux
+tags: [SSH, Linux]
 date: 2026-11-08
 difficulty: Easy
 description: One line shown in lists.
 ---
 ```
 
-- `title`, `ctf` and `date` are required.
+- `title`, `type`, `source` and `date` are required.
+- `type` must be either `competition` or `learning`.
+- Use `competition` for challenges from an organised CTF event.
+- Use `learning` for independent practice, wargames and training labs.
+- `source` is the event or platform name, such as `CSCTF 2026`, `OverTheWire`, `Dreamhack` or `PortSwigger`.
 - `category` defaults to `misc`.
 - `tags`, `difficulty` and `description` are optional. Tags can also be written on one line, separated by commas: `tags: JWT, Auth Bypass`.
 - Add `draft: true` to keep a write-up out of the published site while you work on it.
