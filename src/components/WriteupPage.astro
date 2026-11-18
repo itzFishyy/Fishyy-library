@@ -6,9 +6,9 @@ import WriteupRow from './WriteupRow.astro';
 import {
   type Writeup,
   categoryUrl,
-  ctfUrl,
   formatDate,
   readingTime,
+  sourceUrl,
   tagUrl,
   writeupUrl,
 } from '../lib/writeups';
@@ -21,7 +21,7 @@ interface Props {
 }
 
 const { entry, newer, older, related } = Astro.props;
-const { title, ctf, category, tags, date, difficulty, description, draft } = entry.data;
+const { title, source, category, tags, date, difficulty, description, draft } = entry.data;
 const { Content, headings } = await render(entry);
 const toc = headings.filter((heading) => heading.depth === 2 || heading.depth === 3);
 ---
@@ -46,7 +46,7 @@ const toc = headings.filter((heading) => heading.depth === 2 || heading.depth ==
     <article>
       <header class="post-header">
         <p class="meta">
-          <a href={ctfUrl(ctf)}>{ctf}</a>
+          <a href={sourceUrl(source)}>{source}</a>
           <a href={categoryUrl(category)}>{category}</a>
           {difficulty && <span>{difficulty}</span>}
         </p>
