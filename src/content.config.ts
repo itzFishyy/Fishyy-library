@@ -16,8 +16,10 @@ const writeups = defineCollection({
   schema: z.object({
     /** Challenge name. */
     title: z.string(),
-    /** The CTF event it came from, e.g. "CSCTF 2026". */
-    ctf: z.string(),
+    /** Main Archive section: organised competition or independent learning/practice. */
+    type: z.enum(['competition', 'learning']),
+    /** Event or platform, e.g. "CSCTF 2026", "OverTheWire", "PortSwigger". */
+    source: z.string().trim().min(1),
     /** web, pwn, crypto, reverse, forensics, misc, ... */
     category: z
       .string()
