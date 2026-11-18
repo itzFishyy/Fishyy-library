@@ -24,9 +24,6 @@ export const site = {
     // { label: 'Discord', url: 'https://discord.com/users/your-id' },
     // { label: 'CTFtime', url: 'https://ctftime.org/user/your-id' },
   ] as { label: string; url: string }[],
-
-  /** How many write-ups each Archive page shows. */
-  archivePageSize: 20,
 };
 
 /**
