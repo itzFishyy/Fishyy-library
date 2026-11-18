@@ -12,7 +12,7 @@
     <input
       id="search-dialog-input"
       type="text"
-      placeholder="Search write-ups, tags, CTFs, content…"
+      placeholder="Search write-ups, sources, tags, content…"
       aria-label="Search write-ups"
       aria-controls="search-results"
       autocomplete="off"
@@ -44,7 +44,8 @@
     url: string;
     date: string;
     dateText: string;
-    ctf: string;
+    type: 'competition' | 'learning';
+    source: string;
     category: string;
     tags: string[];
     description: string;
@@ -81,7 +82,7 @@
         items.map((item) => ({
           ...item,
           titleText: item.title.toLowerCase(),
-          metaText: [item.ctf, item.category, ...item.tags, item.description]
+          metaText: [item.type, item.source, item.category, ...item.tags, item.description]
             .join(' ')
             .toLowerCase(),
         })),
@@ -166,7 +167,7 @@
         link.tabIndex = -1;
         link.append(
           line('search-result-title', item.title),
-          line('search-result-meta', [item.dateText, item.category, item.ctf].join(' · ')),
+          line('search-result-meta', [item.dateText, item.source, item.category].join(' · ')),
         );
         if (item.description) link.append(line('search-result-desc', item.description));
         li.append(link);
