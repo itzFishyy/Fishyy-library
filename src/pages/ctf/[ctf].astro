@@ -1,14 +1,15 @@
 ---
 import type { GetStaticPaths } from 'astro';
 import GroupPage from '../../components/GroupPage.astro';
-import { getWriteups, groupByCtf } from '../../lib/writeups';
+import { getWriteups, groupBySource } from '../../lib/writeups';
 
+// Keep the old /ctf/ URLs working for bookmarks and links from older posts.
 export const getStaticPaths = (async () => {
-  return groupByCtf(await getWriteups()).map((group) => ({
+  return groupBySource(await getWriteups()).map((group) => ({
     params: { ctf: group.slug },
     props: { group },
   }));
 }) satisfies GetStaticPaths;
 ---
 
-<GroupPage kind="CTF" group={Astro.props.group} showCtf={false} />
+<GroupPage kind="Source" group={Astro.props.group} showSource={false} />
