@@ -1,6 +1,7 @@
 import { getCollection, type CollectionEntry } from 'astro:content';
 
 export type Writeup = CollectionEntry<'writeups'>;
+export type WriteupType = 'competition' | 'learning';
 
 export interface Group {
   slug: string;
@@ -36,14 +37,14 @@ export function slugify(text: string): string {
   const slug = text
     .toLowerCase()
     .normalize('NFKD')
-    .replace(/[̀-ͯ]/g, '')
+    .replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
   return slug || 'untitled';
 }
 
 export const writeupUrl = (entry: Writeup) => `/writeups/${entry.id}/`;
-export const ctfUrl = (ctf: string) => `/ctf/${slugify(ctf)}/`;
+export const sourceUrl = (source: string) => `/source/${slugify(source)}/`;
 export const categoryUrl = (category: string) => `/category/${slugify(category)}/`;
 export const tagUrl = (tag: string) => `/tags/${slugify(tag)}/`;
 
@@ -62,7 +63,7 @@ export function readingTime(entry: Writeup): string {
 }
 
 /**
- * Groups write-ups by one or more labels each (a CTF name, a category, tags).
+ * Groups write-ups by one or more labels (a source, category, or tags).
  * Groups keep the order in which they are first seen, so with newest-first
  * input the group holding the newest write-up comes first.
  */
@@ -79,20 +80,20 @@ export function groupBy(writeups: Writeup[], labelsOf: (entry: Writeup) => strin
   return [...groups.values()];
 }
 
-export const groupByCtf = (writeups: Writeup[]) => groupBy(writeups, (e) => [e.data.ctf]);
+export const groupBySource = (writeups: Writeup[]) => groupBy(writeups, (e) => [e.data.source]);
 export const groupByCategory = (writeups: Writeup[]) => groupBy(writeups, (e) => [e.data.category]);
 export const groupByTag = (writeups: Writeup[]) => groupBy(writeups, (e) => e.data.tags);
 
-/** Up to `limit` other write-ups that share tags, CTF or category with this one. */
+/** Up to `limit` other write-ups that share tags, source or category with this one. */
 export function getRelated(entry: Writeup, writeups: Writeup[], limit = 3): Writeup[] {
   const tags = new Set(entry.data.tags.map(slugify));
   return writeups
     .filter((other) => other.id !== entry.id)
     .map((other) => {
       const sharedTags = other.data.tags.filter((tag) => tags.has(slugify(tag))).length;
-      const sameCtf = slugify(other.data.ctf) === slugify(entry.data.ctf) ? 1 : 0;
+      const sameSource = slugify(other.data.source) === slugify(entry.data.source) ? 1 : 0;
       const sameCategory = other.data.category === entry.data.category ? 1 : 0;
-      return { other, score: sharedTags * 3 + sameCtf * 2 + sameCategory };
+      return { other, score: sharedTags * 3 + sameSource * 2 + sameCategory };
     })
     .filter(({ score }) => score > 0)
     .sort((a, b) => b.score - a.score)
