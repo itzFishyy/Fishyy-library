@@ -1,17 +1,17 @@
 ---
-// Shared page for "all write-ups from one CTF / in one category / with one tag".
+// Shared page for "all write-ups from one source / in one category / with one tag".
 import Base from '../layouts/Base.astro';
 import WriteupRow from './WriteupRow.astro';
 import type { Group } from '../lib/writeups';
 
 interface Props {
-  /** "CTF", "Category" or "Tag". */
+  /** "Source", "Category" or "Tag". */
   kind: string;
   group: Group;
-  showCtf?: boolean;
+  showSource?: boolean;
 }
 
-const { kind, group, showCtf = true } = Astro.props;
+const { kind, group, showSource = true } = Astro.props;
 const total = group.entries.length;
 ---
 
@@ -24,7 +24,7 @@ const total = group.entries.length;
       {
         group.entries.map((entry) => (
           <li>
-            <WriteupRow entry={entry} showCtf={showCtf} />
+            <WriteupRow entry={entry} showSource={showSource} />
           </li>
         ))
       }
