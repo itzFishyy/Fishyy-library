@@ -35,7 +35,8 @@ export const home = {
   /** The small pill above the heading, e.g. 'Currently playing CTFs'. Empty = hidden. */
   status: '',
   /** The big heading. */
-  heading: "Welcome to Fishyy's library",
+  heading: "Welcome to",
+  heading: "Fishyy's library"
   /**
    * Typed out one after another under the heading,
    * e.g. ['CTF Player', 'Write-up Collector']. Empty = hidden.
@@ -43,7 +44,7 @@ export const home = {
   roles: [] as string[],
   /** One or two sentences about the site, under the heading. Empty = hidden. */
   intro:
-    'A shelf of CTF write-ups: what I solved, how I solved it, and what I learned along the way.',
+    'This site is underconstruction!.',
 
   /**
    * The brief introduction of yourself (the tag on the fishing hook in the
