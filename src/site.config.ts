@@ -36,7 +36,7 @@ export const home = {
   status: '',
   /** The big heading. */
   heading: "Welcome to",
-  heading: "Fishyy's library"
+  heading: "Fishyy's library",
   /**
    * Typed out one after another under the heading,
    * e.g. ['CTF Player', 'Write-up Collector']. Empty = hidden.
