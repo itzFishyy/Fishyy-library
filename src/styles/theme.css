@@ -2,29 +2,28 @@
  * The look of the whole site is controlled from here.
  * Change a value once and every page follows.
  *
- * The first block is the light theme. The second block lists the colors
- * that change in the dark theme.
+ * The site has one theme: dark blue.
  */
 
 :root {
-  color-scheme: light;
+  color-scheme: dark;
 
   /* Colors */
-  --color-bg: #fbfaf7;
-  --color-surface: #ffffff;
-  --color-text: #1f2328;
-  --color-muted: #646b75;
-  --color-border: #e2ded6;
-  --color-accent: #1f5fbf;
-  --color-accent-soft: #e6eefb;
-  --color-highlight: #fff6d6;
-  --color-highlight-border: #e6c95c;
-  --color-code-bg: #f3f1ec;
-  --color-button: #1f5fbf;
+  --color-bg: #0e1f38;
+  --color-surface: #142a4a;
+  --color-text: #e8eef7;
+  --color-muted: #9db0c9;
+  --color-border: #264166;
+  --color-accent: #7fb8ff;
+  --color-accent-soft: #1b3a63;
+  --color-highlight: #2f2a10;
+  --color-highlight-border: #8a7424;
+  --color-code-bg: #0b182c;
+  --color-button: #1f6fc4;
   --color-button-text: #ffffff;
-  --color-backdrop: rgb(20 22 26 / 55%);
+  --color-backdrop: rgb(3 10 22 / 70%);
 
-  /* The terminal card on the homepage (dark in both themes) */
+  /* The terminal card on the homepage */
   --color-terminal-bg: #1b1e23;
   --color-terminal-bar: #24282e;
   --color-terminal-border: #343a42;
@@ -41,22 +40,9 @@
   /* Sizes */
   --width-page: 68rem;
   --width-text: 46rem;
+  /* The Writeups page: its full width, and the width of its folder list */
+  --width-library: 92rem;
+  --width-tree: 18rem;
   --radius: 8px;
   --header-height: 3.5rem;
-}
-
-:root[data-theme='dark'] {
-  color-scheme: dark;
-
-  --color-bg: #15171a;
-  --color-surface: #1d2024;
-  --color-text: #e6e8eb;
-  --color-muted: #9aa2ad;
-  --color-border: #30353c;
-  --color-accent: #7fb0ff;
-  --color-accent-soft: #1f2c42;
-  --color-highlight: #2e2a17;
-  --color-highlight-border: #8a7424;
-  --color-code-bg: #22262b;
-  --color-backdrop: rgb(0 0 0 / 65%);
 }

@@ -27,14 +27,13 @@ export const site = {
 };
 
 /**
- * The introduction on the homepage.
+ * The first screen of the homepage: the welcome on one side and a brief
+ * introduction of yourself on the other.
  * To hide a piece, make it empty: '' for text, [] for a list.
  */
 export const home = {
-  /** The small pill above the greeting, e.g. 'Currently playing CTFs'. Empty = hidden. */
+  /** The small pill above the heading, e.g. 'Currently playing CTFs'. Empty = hidden. */
   status: '',
-  /** The small line above the big heading. */
-  greeting: "Hey, It's me, It's Fishity",
   /** The big heading. */
   heading: "Welcome to Fishyy's library",
   /**
@@ -42,14 +41,27 @@ export const home = {
    * e.g. ['CTF Player', 'Write-up Collector']. Empty = hidden.
    */
   roles: [] as string[],
-  /** A few sentences introducing yourself. */
+  /** One or two sentences about the site, under the heading. Empty = hidden. */
   intro:
     'A shelf of CTF write-ups: what I solved, how I solved it, and what I learned along the way.',
+
+  /**
+   * The brief introduction of yourself (the tag on the fishing hook in the
+   * design). Keep it short: the About page holds the details.
+   */
+  me: {
+    /** Its first line. */
+    greeting: "Hey, It's me, It's Fishity",
+    /** A few short lines, one paragraph each. */
+    lines: ["I'm Fishyy. I play CTFs and keep my write-ups in this library."],
+    /** The link to the About page under it. Empty = hidden. */
+    more: 'More about me',
+  },
 };
 
 /**
  * The terminal-style card on the homepage.
- * Set `show` to true to display it next to the introduction.
+ * Set `show` to true to display it in place of the brief introduction.
  */
 export const terminal = {
   show: false,
@@ -87,10 +99,19 @@ export const wip = {
   progress: 30,
 };
 
+/** What the Writeups page shows on its right side before a write-up is picked. */
+export const writeupsPage = {
+  heading: 'Writeups',
+  intro: 'Pick a write-up from the folders, or start with one of the newest.',
+  /** How many of the newest write-ups are listed. */
+  recentCount: 5,
+};
+
 /** The navigation bar. An item without `href` is shown but does nothing when clicked. */
 export const nav: { label: string; href?: string }[] = [
   { label: 'Home', href: '/' },
-  { label: 'About', href: '/about/' },
+  { label: 'Writeups', href: '/writeups/' },
   { label: 'Archive', href: '/archive/' },
+  { label: 'About', href: '/about/' },
   { label: '????', href: '/wip/' },
 ];

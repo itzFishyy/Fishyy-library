@@ -1,0 +1,65 @@
+---
+// One folder on the Writeups page: everything inside it, newest first.
+import type { GetStaticPaths } from 'astro';
+import Library from '../../layouts/Library.astro';
+import FolderPath from '../../components/FolderPath.astro';
+import WriteupRow from '../../components/WriteupRow.astro';
+import {
+  type FolderNode,
+  type FolderRef,
+  allFolders,
+  buildTree,
+  entriesIn,
+  folderUrl,
+  getWriteups,
+} from '../../lib/writeups';
+
+export const getStaticPaths = (async () => {
+  const folders = allFolders(buildTree(await getWriteups()));
+  return folders.map((node) => ({
+    params: { path: node.path },
+    props: {
+      node,
+      // The folders this one sits inside, outermost first.
+      parents: folders
+        .filter((other) => node.path.startsWith(`${other.path}/`))
+        .map(({ name, path }): FolderRef => ({ name, path })),
+    },
+  }));
+}) satisfies GetStaticPaths;
+
+const { node, parents } = Astro.props as { node: FolderNode; parents: FolderRef[] };
+const entries = entriesIn(node);
+---
+
+<Library title={node.name} openPath={node.path} currentFolder={node.path}>
+  <div class="folder-page">
+    <FolderPath folders={parents} />
+    <h1 class="page-title">{node.name}</h1>
+    <p class="page-subtitle">{node.count} {node.count === 1 ? 'write-up' : 'write-ups'}</p>
+
+    {
+      node.folders.length > 0 && (
+        <ul class="tags folder-children">
+          {node.folders.map((child) => (
+            <li>
+              <a class="tag" href={folderUrl(child.path)}>
+                {child.name} ({child.count})
+              </a>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+
+    <ul class="row-list">
+      {
+        entries.map((entry) => (
+          <li>
+            <WriteupRow entry={entry} showSource={node.folders.length > 0} />
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</Library>

@@ -2,13 +2,26 @@
 import { nav, site } from '../site.config';
 
 const path = Astro.url.pathname;
-const isCurrent = (href: string) => (href === '/' ? path === '/' : path.startsWith(href));
+// Folder pages are part of the Writeups page, so they light up the same item.
+const isCurrent = (href: string) =>
+  href === '/'
+    ? path === '/'
+    : path.startsWith(href) || (href === '/writeups/' && path.startsWith('/folders/'));
 ---
 
 <header class="site-header">
   <div class="site-header-inner">
     <a class="brand" href="/">{site.title}</a>
     <nav class="site-nav" aria-label="Main">
+      <!-- Opens the search pop-up (see SearchDialog.astro). Ctrl+K does the same. -->
+      <button class="nav-search" type="button" data-search-open aria-label="Search write-ups">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="7"></circle>
+          <path d="M20 20l-3.5-3.5"></path>
+        </svg>
+        <span>Search</span>
+        <kbd>Ctrl K</kbd>
+      </button>
       {
         nav.map((item) =>
           item.href ? (
@@ -26,28 +39,6 @@ const isCurrent = (href: string) => (href === '/' ? path === '/' : path.startsWi
           )
         )
       }
-      <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch between light and dark theme">
-        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-          <circle cx="12" cy="12" r="4.5"></circle>
-          <path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"></path>
-        </svg>
-        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-        </svg>
-      </button>
     </nav>
   </div>
 </header>
-
-<script>
-  document.querySelector('[data-theme-toggle]')?.addEventListener('click', () => {
-    const root = document.documentElement;
-    const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
-    root.dataset.theme = next;
-    try {
-      localStorage.setItem('theme', next);
-    } catch {
-      // Private windows may block storage; the switch still works for this page.
-    }
-  });
-</script>

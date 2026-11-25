@@ -1,52 +1,109 @@
 ---
+// The logbook: every write-up by date, one short line each, grouped by
+// year and month so the whole history can be read at a glance.
 import Base from '../../layouts/Base.astro';
-import WriteupRow from '../../components/WriteupRow.astro';
-import { getWriteups } from '../../lib/writeups';
+import {
+  type Writeup,
+  categoryUrl,
+  folderUrl,
+  getWriteups,
+  sourceOf,
+  writeupUrl,
+} from '../../lib/writeups';
+
+interface Month {
+  name: string;
+  entries: Writeup[];
+}
+
+interface Year {
+  year: number;
+  count: number;
+  months: Month[];
+}
 
 const writeups = await getWriteups();
-const competitions = writeups.filter((entry) => entry.data.type === 'competition');
-const learning = writeups.filter((entry) => entry.data.type === 'learning');
+
+// Write-ups arrive newest first, so years and months come out newest first too.
+const years: Year[] = [];
+for (const entry of writeups) {
+  const date = entry.data.date;
+  const yearNumber = date.getUTCFullYear();
+  const monthName = date.toLocaleDateString('en-GB', { month: 'long', timeZone: 'UTC' });
+
+  let year = years.at(-1);
+  if (!year || year.year !== yearNumber) {
+    year = { year: yearNumber, count: 0, months: [] };
+    years.push(year);
+  }
+  let month = year.months.at(-1);
+  if (!month || month.name !== monthName) {
+    month = { name: monthName, entries: [] };
+    year.months.push(month);
+  }
+  year.count += 1;
+  month.entries.push(entry);
+}
+
+const plural = (count: number) => `${count} ${count === 1 ? 'write-up' : 'write-ups'}`;
 ---
 
 <Base title="Archive">
   <div class="container">
     <h1 class="page-title">Archive</h1>
-    <p class="page-subtitle">{writeups.length} {writeups.length === 1 ? 'write-up' : 'write-ups'}</p>
+    <p class="page-subtitle">{plural(writeups.length)}, newest first</p>
 
     {writeups.length === 0 && <p class="empty">No write-ups yet.</p>}
 
-    <section class="archive-section" aria-labelledby="competitions-title">
-      <div class="archive-section-heading">
-        <div>
-          <p class="archive-kicker">Organised events</p>
-          <h2 id="competitions-title" class="section-title">Competitions <span class="count">({competitions.length})</span></h2>
-        </div>
-        <p class="muted archive-description">Challenges from CTF events and competitions.</p>
-      </div>
-      {
-        competitions.length > 0 ? (
-          <ul class="row-list archive-list">
-            {competitions.map((entry) => <li><WriteupRow entry={entry} /></li>)}
-          </ul>
-        ) : <p class="empty archive-empty">No competition write-ups yet.</p>
-      }
-    </section>
+    {
+      years.length > 1 && (
+        <nav class="log-years" aria-label="Years">
+          {years.map((year) => (
+            <a class="tag" href={`#year-${year.year}`}>
+              {year.year}
+            </a>
+          ))}
+        </nav>
+      )
+    }
 
-    <section class="archive-section" aria-labelledby="learning-title">
-      <div class="archive-section-heading">
-        <div>
-          <p class="archive-kicker">Independent practice</p>
-          <h2 id="learning-title" class="section-title">Learning &amp; Practice <span class="count">({learning.length})</span></h2>
-        </div>
-        <p class="muted archive-description">Wargames, guided labs and other hands-on learning challenges.</p>
-      </div>
-      {
-        learning.length > 0 ? (
-          <ul class="row-list archive-list">
-            {learning.map((entry) => <li><WriteupRow entry={entry} /></li>)}
-          </ul>
-        ) : <p class="empty archive-empty">No learning write-ups yet.</p>
-      }
-    </section>
+    {
+      years.map((year) => (
+        <section class="log-year" id={`year-${year.year}`}>
+          <h2 class="section-title">
+            {year.year}
+            <span class="count">{plural(year.count)}</span>
+          </h2>
+          {year.months.map((month) => (
+            <div class="log-month">
+              <h3 class="log-month-title">
+                {month.name}
+                <span class="count">{month.entries.length}</span>
+              </h3>
+              <ul class="log-list">
+                {month.entries.map((entry) => {
+                  const source = sourceOf(entry);
+                  return (
+                    <li class="log-line">
+                      <time class="log-day" datetime={entry.data.date.toISOString()}>
+                        {String(entry.data.date.getUTCDate()).padStart(2, '0')}
+                      </time>
+                      <a class="log-title" href={writeupUrl(entry)}>
+                        {entry.data.title}
+                        {entry.data.draft && <span class="badge">Draft</span>}
+                      </a>
+                      <span class="log-meta">
+                        {source && <a href={folderUrl(source.path)}>{source.label}</a>}
+                        <a href={categoryUrl(entry.data.category)}>{entry.data.category}</a>
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ))}
+        </section>
+      ))
+    }
   </div>
 </Base>

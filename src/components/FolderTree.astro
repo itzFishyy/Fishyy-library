@@ -1,0 +1,105 @@
+---
+// The folder list on the Writeups page. It mirrors the folders inside
+// src/content/writeups/: where a file is saved decides where it shows here.
+import FolderTreeNode from './FolderTreeNode.astro';
+import { buildTree, getWriteups, writeupSlug, writeupUrl } from '../lib/writeups';
+
+interface Props {
+  /** Address name of the write-up being shown. */
+  currentSlug?: string;
+  /** Folder to open, e.g. "learning-practice/overthewire/bandit". */
+  openPath?: string;
+  /** The folder whose own page is being shown. */
+  currentFolder?: string;
+}
+
+const { currentSlug, openPath = '', currentFolder } = Astro.props;
+const root = buildTree(await getWriteups());
+
+// "a/b/c" opens "a", "a/b" and "a/b/c".
+const parts = openPath.split('/').filter(Boolean);
+const openPaths = parts.map((_, index) => parts.slice(0, index + 1).join('/'));
+---
+
+<nav class="tree" aria-label="Write-up folders" data-tree>
+  {
+    root.folders.map((node) => (
+      <FolderTreeNode
+        node={node}
+        currentSlug={currentSlug}
+        openPaths={openPaths}
+        currentFolder={currentFolder}
+      />
+    ))
+  }
+  {
+    root.entries.length > 0 && (
+      <ul class="tree-list tree-loose">
+        {root.entries.map((entry) => (
+          <li>
+            <a
+              class="tree-link"
+              href={writeupUrl(entry)}
+              aria-current={writeupSlug(entry) === currentSlug ? 'page' : undefined}
+            >
+              {entry.data.title}
+              {entry.data.draft && <span class="badge">Draft</span>}
+            </a>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+  {root.count === 0 && <p class="muted tree-empty">No write-ups yet.</p>}
+</nav>
+
+<!--
+  Runs before the page is drawn, so the list does not jump:
+  - folders you opened or closed stay that way on the next page,
+  - the list keeps its scroll position, and the page being shown is in view.
+-->
+<script is:inline>
+  (function () {
+    var tree = document.querySelector('[data-tree]');
+    if (!tree) return;
+
+    var saved = {};
+    try {
+      saved = JSON.parse(localStorage.getItem('folders-open') || '{}') || {};
+    } catch (e) {}
+
+    tree.querySelectorAll('details[data-folder]').forEach(function (folder) {
+      var path = folder.dataset.folder;
+      // The folders holding the page being shown always start open.
+      if (!folder.hasAttribute('data-on-path') && path in saved) folder.open = !!saved[path];
+      folder.addEventListener('toggle', function () {
+        saved[path] = folder.open;
+        try {
+          localStorage.setItem('folders-open', JSON.stringify(saved));
+        } catch (e) {}
+      });
+    });
+
+    var pane = tree.closest('[data-tree-pane]');
+    if (!pane) return;
+    try {
+      var top = sessionStorage.getItem('folders-scroll');
+      if (top !== null) pane.scrollTop = Number(top);
+    } catch (e) {}
+
+    var current = tree.querySelector('[aria-current="page"], .tree-summary.current');
+    if (current) {
+      var item = current.getBoundingClientRect();
+      var box = pane.getBoundingClientRect();
+      if (box.height > 0 && (item.top < box.top || item.bottom > box.bottom)) {
+        pane.scrollTop += item.top - box.top - box.height / 3;
+      }
+    }
+
+    window.addEventListener('pagehide', function () {
+      try {
+        sessionStorage.setItem('folders-scroll', String(pane.scrollTop));
+      } catch (e) {}
+    });
+  })();
+</script>

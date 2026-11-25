@@ -1,0 +1,110 @@
+---
+// The two-sided layout of the Writeups page: the folder list on the left,
+// the write-up (or a folder's contents) on the right.
+import Base from './Base.astro';
+import FolderTree from '../components/FolderTree.astro';
+
+interface Props {
+  title?: string;
+  description?: string;
+  noindex?: boolean;
+  /** Address name of the write-up being shown. */
+  currentSlug?: string;
+  /** Folder to open in the list, e.g. "competitions/csctf-2026". */
+  openPath?: string;
+  /** The folder whose own page is being shown. */
+  currentFolder?: string;
+}
+
+const { title, description, noindex, currentSlug, openPath, currentFolder } = Astro.props;
+---
+
+<Base title={title} description={description} noindex={noindex}>
+  <div class="library" data-library>
+    <!-- Hides the folder list before the page is drawn if you hid it earlier. -->
+    <script is:inline>
+      try {
+        if (localStorage.getItem('folders-hidden') === '1') {
+          document.currentScript.parentElement.dataset.tree = 'hidden';
+        }
+      } catch (e) {}
+    </script>
+
+    <aside id="folders" class="tree-pane" data-tree-pane aria-label="Folders">
+      <div class="tree-head">
+        <p class="tree-title">Folders</p>
+        <button class="tree-close" type="button" data-tree-toggle aria-label="Close folders">
+          ×
+        </button>
+      </div>
+      <FolderTree currentSlug={currentSlug} openPath={openPath} currentFolder={currentFolder} />
+    </aside>
+    <div class="tree-backdrop" data-tree-toggle></div>
+
+    <div class="library-main">
+      <button
+        class="tree-toggle"
+        type="button"
+        data-tree-toggle
+        data-tree-button
+        aria-controls="folders"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+        </svg>
+        Folders
+      </button>
+      <slot />
+    </div>
+  </div>
+</Base>
+
+<script>
+  // On a wide screen the folder list sits beside the write-up and the button
+  // hides or shows it (remembered for next time). On a narrow screen the list
+  // is tucked away and the button slides it in over the page.
+  const library = document.querySelector<HTMLElement>('[data-library]');
+  const button = document.querySelector<HTMLElement>('[data-tree-button]');
+  const wide = window.matchMedia('(min-width: 60rem)');
+
+  if (library) {
+    const isShown = () =>
+      wide.matches ? library.dataset.tree !== 'hidden' : library.dataset.tree === 'open';
+    const update = () => button?.setAttribute('aria-expanded', String(isShown()));
+
+    const toggle = () => {
+      if (wide.matches) {
+        const hide = library.dataset.tree !== 'hidden';
+        if (hide) library.dataset.tree = 'hidden';
+        else delete library.dataset.tree;
+        try {
+          localStorage.setItem('folders-hidden', hide ? '1' : '0');
+        } catch {
+          // Private windows may block storage; the button still works for this page.
+        }
+      } else if (library.dataset.tree === 'open') {
+        delete library.dataset.tree;
+      } else {
+        library.dataset.tree = 'open';
+      }
+      update();
+    };
+
+    document.addEventListener('click', (event) => {
+      const target = event.target instanceof Element ? event.target : null;
+      if (target?.closest('[data-tree-toggle]')) toggle();
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && !wide.matches && library.dataset.tree === 'open') toggle();
+    });
+
+    // Leaving the slide-in state behind when the window is resized across the two layouts.
+    wide.addEventListener('change', () => {
+      if (library.dataset.tree === 'open') delete library.dataset.tree;
+      update();
+    });
+
+    update();
+  }
+</script>

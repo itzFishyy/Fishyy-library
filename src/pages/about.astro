@@ -1,11 +1,11 @@
 ---
 import Base from '../layouts/Base.astro';
 import FriendsList from '../components/FriendsList.astro';
-import { categoryUrl, getWriteups, groupByCategory, groupByCtf } from '../lib/writeups';
+import { categoryUrl, countSources, getWriteups, groupByCategory } from '../lib/writeups';
 import { site } from '../site.config';
 
 const writeups = await getWriteups();
-const ctfCount = groupByCtf(writeups).length;
+const sourceCount = countSources(writeups);
 const categories = groupByCategory(writeups).sort((a, b) => b.entries.length - a.entries.length);
 ---
 
@@ -14,7 +14,7 @@ const categories = groupByCategory(writeups).sort((a, b) => b.entries.length - a
     <h1 class="page-title">About {site.author}</h1>
     <p class="page-subtitle">
       {
-        `${writeups.length} ${writeups.length === 1 ? 'write-up' : 'write-ups'} from ${ctfCount} ${ctfCount === 1 ? 'CTF' : 'CTFs'}`
+        `${writeups.length} ${writeups.length === 1 ? 'write-up' : 'write-ups'} from ${sourceCount} ${sourceCount === 1 ? 'source' : 'sources'}`
       }
     </p>
 

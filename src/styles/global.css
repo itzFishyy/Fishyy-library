@@ -165,6 +165,22 @@ a.nav-link:hover,
   user-select: none;
 }
 
+/* On a phone the navigation bar needs two lines, so it scrolls away with
+   the page instead of staying on top and covering a fifth of the screen. */
+@media (max-width: 40rem) {
+  html {
+    scroll-padding-top: 1rem;
+  }
+
+  .site-header {
+    position: static;
+  }
+
+  .nav-link {
+    padding: 0.35rem 0.5rem;
+  }
+}
+
 .site-footer {
   border-top: 1px solid var(--color-border);
   padding: 1.25rem 1rem;
@@ -187,28 +203,49 @@ a.nav-link:hover,
   gap: 2.5rem;
 }
 
+/* Wide screens: the welcome on the left, the brief introduction on the right. */
 @media (min-width: 60rem) {
-  .hero.has-terminal {
-    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  .hero {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
   }
 }
 
-/* Without the terminal card, the introduction is centered. */
-.hero.centered {
-  text-align: center;
-}
-
-.hero.centered .hero-intro,
-.hero.centered .search-trigger {
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.hero.centered .hero-actions {
-  justify-content: center;
-}
-
 .scroll-hint {
+  text-decoration: none;
+}
+
+/* The brief introduction of yourself (the tag on the hook in the design). */
+.me-card {
+  width: 100%;
+  max-width: 22rem;
+  justify-self: center;
+  padding: 1.5rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+}
+
+.me-card p {
+  margin: 0.5rem 0 0;
+}
+
+.me-card .me-greeting {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.me-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+}
+
+.me-card .me-more {
+  margin-top: 1rem;
+}
+
+.me-more a {
   text-decoration: none;
 }
 
@@ -285,12 +322,6 @@ a.nav-link:hover,
   background: #2da44e;
 }
 
-.hero-kicker {
-  margin: 0;
-  color: var(--color-muted);
-  font-size: 1.2rem;
-}
-
 .hero h1 {
   margin: 0.25rem 0 0.75rem;
   font-size: clamp(2rem, 5.5vw, 3.5rem);
@@ -337,32 +368,30 @@ a.nav-link:hover,
   font-size: 1.05rem;
 }
 
-.search-trigger {
-  width: 100%;
-  max-width: 36rem;
-  display: flex;
+/* The search button in the navigation bar; it opens the search pop-up. */
+.nav-search {
+  margin-right: 0.5rem;
+  display: inline-flex;
   align-items: center;
-  gap: 0.6rem;
-  padding: 0.75rem 1rem;
+  gap: 0.5rem;
+  padding: 0.3rem 0.6rem;
   font: inherit;
-  text-align: left;
+  font-size: 0.9rem;
   color: var(--color-muted);
-  background: var(--color-surface);
+  background: var(--color-bg);
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
-  cursor: text;
+  cursor: pointer;
 }
 
-.search-trigger:hover {
+.nav-search:hover {
   border-color: var(--color-accent);
 }
 
-.search-trigger span {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+@media (max-width: 40rem) {
+  .nav-search kbd {
+    display: none;
+  }
 }
 
 .search-icon {
@@ -379,39 +408,6 @@ kbd {
   background: var(--color-bg);
   border: 1px solid var(--color-border);
   border-radius: 5px;
-}
-
-.hero-actions {
-  margin-top: 1.5rem;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.button {
-  display: inline-block;
-  padding: 0.6rem 1.1rem;
-  font-weight: 600;
-  text-decoration: none;
-  color: var(--color-button-text);
-  background: var(--color-button);
-  border: 1px solid var(--color-button);
-  border-radius: var(--radius);
-}
-
-.button.secondary {
-  color: var(--color-text);
-  background: var(--color-surface);
-  border-color: var(--color-border);
-}
-
-.hero-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem 1rem;
-  padding-left: 0.75rem;
-  border-left: 1px solid var(--color-border);
 }
 
 /* Terminal card */
@@ -536,35 +532,6 @@ kbd {
 
 .terminal-end {
   margin: 0.6rem 0 0;
-}
-
-/* Theme switch */
-
-.theme-toggle {
-  width: 2.25rem;
-  height: 2.25rem;
-  display: grid;
-  place-items: center;
-  padding: 0;
-  color: var(--color-text);
-  background: none;
-  border: 1px solid transparent;
-  border-radius: var(--radius);
-  cursor: pointer;
-}
-
-.theme-toggle:hover {
-  background: var(--color-accent-soft);
-}
-
-.theme-toggle svg {
-  width: 1.15rem;
-  height: 1.15rem;
-}
-
-:root[data-theme='dark'] .theme-toggle .icon-moon,
-:root:not([data-theme='dark']) .theme-toggle .icon-sun {
-  display: none;
 }
 
 /* Search pop-up */
@@ -705,31 +672,6 @@ kbd {
   font-size: 1.5rem;
 }
 
-.featured {
-  margin-bottom: 2.5rem;
-  padding: 1.25rem;
-  background: var(--color-highlight);
-  border: 1px solid var(--color-highlight-border);
-  border-radius: var(--radius);
-}
-
-.featured-label {
-  margin: 0 0 0.5rem;
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.featured .row {
-  padding: 0;
-  border: 0;
-}
-
-.featured .row-title {
-  font-size: 1.5rem;
-}
-
 .row-list {
   margin: 0;
   padding: 0;
@@ -807,110 +749,219 @@ kbd {
   border-radius: 999px;
 }
 
-.group {
-  margin-bottom: 1rem;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-}
-
-.group > summary {
-  padding: 0.75rem 1rem;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.group .row-list {
-  padding: 0 1rem;
-  border-top: 1px solid var(--color-border);
-}
-
 .count {
   margin-left: 0.4rem;
   font-weight: 400;
   color: var(--color-muted);
 }
 
-/* Archive sections */
+/* Homepage, below the first screen: a side column with the shelves and the
+   filter buttons, and the list of write-ups beside it. */
 
-.archive-section {
-  margin-top: 2.5rem;
+.home-browse {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.5rem 2.5rem;
 }
 
-.archive-section-heading {
-  margin-bottom: 0.75rem;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: end;
-  justify-content: space-between;
-  gap: 0.25rem 1.5rem;
+@media (min-width: 60rem) {
+  .home-browse {
+    grid-template-columns: 16rem minmax(0, 1fr);
+  }
+
+  /* The side column stays in view while the list scrolls. */
+  .home-side {
+    position: sticky;
+    top: calc(var(--header-height) + 1rem);
+    align-self: start;
+    max-height: calc(100vh - var(--header-height) - 2rem);
+    overflow-y: auto;
+  }
 }
 
-.archive-section-heading .section-title {
-  margin-bottom: 0;
+.side-block + .side-block {
+  margin-top: 1.5rem;
 }
 
-.archive-kicker {
-  margin: 0 0 0.2rem;
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
+.side-title {
+  margin: 0 0 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-muted);
 }
 
-.archive-description {
-  margin: 0 0 0.15rem;
-  font-size: 0.9rem;
+.shelf-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-.archive-list {
-  padding: 0 1rem;
-  background: var(--color-surface);
+.shelf-list a {
+  padding: 0.35rem 0.5rem;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: var(--color-text);
+  text-decoration: none;
+  border-radius: 6px;
+}
+
+.shelf-list a:hover {
+  background: var(--color-accent-soft);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.chip {
+  padding: 0.2rem 0.7rem;
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--color-text);
+  background: var(--color-bg);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius);
+  border-radius: 999px;
+  cursor: pointer;
 }
 
-.archive-empty {
-  padding: 1.25rem;
+.chip:hover {
+  border-color: var(--color-accent);
 }
 
-/* Archive table */
-
-
-
-.table-wrap {
-  overflow-x: auto;
+.chip[aria-pressed='true'] {
+  color: var(--color-button-text);
+  background: var(--color-button);
+  border-color: var(--color-button);
 }
 
-.archive-table {
-  width: 100%;
-  border-collapse: collapse;
+.chip[aria-pressed='true'] .count {
+  color: inherit;
 }
 
-.archive-table th,
-.archive-table td {
-  padding: 0.6rem 0.75rem;
-  text-align: left;
+/* Tags past the first few stay hidden until "more" is pressed. */
+.chips:not([data-open]) .chip[data-extra] {
+  display: none;
+}
+
+.chip-more {
+  color: var(--color-accent);
+  border-style: dashed;
+}
+
+.filter-status {
+  margin: 0 0 0.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 1rem;
+  font-size: 0.9rem;
+  color: var(--color-muted);
+}
+
+.filter-clear {
+  padding: 0;
+  font: inherit;
+  color: var(--color-accent);
+  background: none;
+  border: 0;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* Archive logbook */
+
+.log-years {
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.log-year {
+  margin-top: 2rem;
+}
+
+.log-year .section-title {
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.4rem;
   border-bottom: 1px solid var(--color-border);
 }
 
-.archive-table th {
+.log-year .section-title .count {
+  font-size: 0.9rem;
+}
+
+.log-month {
+  margin-top: 1rem;
+}
+
+.log-month-title {
+  margin: 0 0 0.25rem;
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.log-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.log-line {
+  padding: 0.3rem 0;
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr);
+  gap: 0 0.75rem;
+  align-items: baseline;
+}
+
+.log-day {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  color: var(--color-muted);
+}
+
+.log-title {
+  font-weight: 600;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.log-title:hover {
+  text-decoration: underline;
+}
+
+.log-meta {
+  grid-column: 2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.1rem 0.75rem;
   font-size: 0.85rem;
   color: var(--color-muted);
 }
 
-.archive-table td:first-child {
-  white-space: nowrap;
-  color: var(--color-muted);
+.log-meta a {
+  color: inherit;
 }
 
-.pagination {
-  margin-top: 1.5rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
+@media (min-width: 48rem) {
+  .log-line {
+    grid-template-columns: 2rem minmax(0, 1fr) auto;
+  }
+
+  .log-meta {
+    grid-column: 3;
+    justify-content: flex-end;
+  }
 }
 
 /* Friends */
@@ -946,7 +997,259 @@ kbd {
   color: var(--color-muted);
 }
 
-/* Write-up page */
+/* Writeups page: folder list on the left, the write-up on the right */
+
+.library {
+  width: 100%;
+  max-width: var(--width-library);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.library-main {
+  min-width: 0;
+  padding: 1.25rem 1rem 3rem;
+}
+
+.tree-toggle {
+  margin-bottom: 1.25rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.7rem;
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.tree-toggle:hover {
+  border-color: var(--color-accent);
+}
+
+.tree-toggle svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.tree-pane {
+  padding: 1rem 0.75rem 2rem;
+  overflow-y: auto;
+  background: var(--color-surface);
+  border-right: 1px solid var(--color-border);
+}
+
+.tree-head {
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tree-title {
+  margin: 0;
+  padding-left: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.tree-close {
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  font-size: 1.4rem;
+  line-height: 1;
+  color: var(--color-text);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+/* Wide screens: the list stays beside the write-up while it scrolls. */
+@media (min-width: 60rem) {
+  .library {
+    grid-template-columns: var(--width-tree) minmax(0, 1fr);
+  }
+
+  .library[data-tree='hidden'] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .library[data-tree='hidden'] .tree-pane {
+    display: none;
+  }
+
+  .library-main {
+    padding: 1.5rem 2rem 3rem;
+  }
+
+  .tree-pane {
+    position: sticky;
+    top: var(--header-height);
+    height: calc(100vh - var(--header-height));
+  }
+
+  .tree-close,
+  .tree-backdrop {
+    display: none;
+  }
+}
+
+/* Narrow screens: the list slides in over the page. */
+@media (max-width: 59.99rem) {
+  .tree-pane {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 30;
+    width: min(20rem, 85vw);
+    visibility: hidden;
+    transform: translateX(-100%);
+    transition:
+      transform 0.2s ease,
+      visibility 0.2s;
+  }
+
+  .library[data-tree='open'] .tree-pane {
+    visibility: visible;
+    transform: none;
+  }
+
+  .tree-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 25;
+    background: var(--color-backdrop);
+  }
+
+  .library[data-tree='open'] .tree-backdrop {
+    display: block;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tree-pane {
+    transition: none;
+  }
+}
+
+.tree-summary {
+  padding: 0.3rem 0.4rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.tree-summary::-webkit-details-marker {
+  display: none;
+}
+
+/* The small arrow in front of a folder; it turns when the folder is open. */
+.tree-summary::before {
+  content: '▸';
+  flex: none;
+  width: 0.8rem;
+  color: var(--color-muted);
+}
+
+.tree-folder[open] > .tree-summary::before {
+  content: '▾';
+}
+
+.tree-summary:hover,
+.tree-summary.current {
+  background: var(--color-accent-soft);
+}
+
+.tree-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.tree-summary .count {
+  margin-left: auto;
+  font-size: 0.8rem;
+}
+
+/* Everything inside a folder is set in a little, with a guide line. */
+.tree-children {
+  margin-left: 0.75rem;
+  padding-left: 0.5rem;
+  border-left: 1px solid var(--color-border);
+}
+
+.tree-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tree-link {
+  display: block;
+  padding: 0.25rem 0.4rem;
+  font-size: 0.9rem;
+  color: var(--color-text);
+  text-decoration: none;
+  border-radius: 6px;
+  overflow-wrap: anywhere;
+}
+
+.tree-link:hover {
+  background: var(--color-accent-soft);
+}
+
+.tree-link[aria-current='page'] {
+  font-weight: 600;
+  color: var(--color-accent);
+  background: var(--color-accent-soft);
+}
+
+.tree-empty {
+  padding: 0 0.4rem;
+  font-size: 0.9rem;
+}
+
+/* Competitions ▸ CSCTF 2026 */
+.folder-path ol {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.1rem 0.4rem;
+  font-size: 0.9rem;
+  color: var(--color-muted);
+  list-style: none;
+}
+
+.folder-path li + li::before {
+  content: '▸';
+  margin-right: 0.4rem;
+}
+
+.folder-path a {
+  color: inherit;
+}
+
+.folder-page {
+  max-width: var(--width-text);
+}
+
+.folder-children {
+  margin: 0 0 1.25rem;
+}
+
+/* Write-up */
 
 .post {
   display: grid;
@@ -954,18 +1257,43 @@ kbd {
   gap: 2rem;
 }
 
-@media (min-width: 60rem) {
+/* The contents list is a folding box above the text... */
+.toc-side {
+  display: none;
+}
+
+.toc-inline {
+  max-width: var(--width-text);
+  margin: 1.25rem 0;
+}
+
+.toc-inline > summary {
+  margin: 0;
+  cursor: pointer;
+}
+
+.toc-inline[open] > summary {
+  margin-bottom: 0.5rem;
+}
+
+/* ...and a third column once the screen is wide enough for one. */
+@media (min-width: 80rem) {
   .post.has-toc {
-    grid-template-columns: minmax(0, 1fr) 15rem;
+    grid-template-columns: minmax(0, 1fr) 14rem;
   }
 
-  .toc {
+  .toc-side {
+    display: block;
     order: 2;
     position: sticky;
     top: calc(var(--header-height) + 1rem);
     align-self: start;
     max-height: calc(100vh - var(--header-height) - 2rem);
     overflow-y: auto;
+  }
+
+  .toc-inline {
+    display: none;
   }
 }
 
@@ -1069,11 +1397,10 @@ kbd {
   border-radius: var(--radius);
 }
 
-/* Code highlighting follows the light or dark theme. */
-:root[data-theme='dark'] .astro-code,
-:root[data-theme='dark'] .astro-code span {
-  color: var(--shiki-dark) !important;
-  background-color: var(--shiki-dark-bg) !important;
+/* Code blocks use the site's own background instead of the one that comes
+   with the code color scheme. */
+.prose pre.astro-code {
+  background-color: var(--color-code-bg) !important;
 }
 
 .post-nav {

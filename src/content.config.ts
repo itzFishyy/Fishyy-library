@@ -16,10 +16,9 @@ const writeups = defineCollection({
   schema: z.object({
     /** Challenge name. */
     title: z.string(),
-    /** Main Archive section: organised competition or independent learning/practice. */
-    type: z.enum(['competition', 'learning']),
-    /** Event or platform, e.g. "CSCTF 2026", "OverTheWire", "PortSwigger". */
-    source: z.string().trim().min(1),
+    // Where a write-up belongs (Competitions, Learning & Practice, which event
+    // or platform) is not written here: it comes from the folder the file is
+    // saved in. See foldersOf() in src/lib/writeups.ts.
     /** web, pwn, crypto, reverse, forensics, misc, ... */
     category: z
       .string()

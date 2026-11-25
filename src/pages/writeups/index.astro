@@ -1,0 +1,36 @@
+---
+// The Writeups page as opened from the navigation bar: the folder list on
+// the left, and a short welcome with the newest write-ups on the right.
+// The texts are in src/site.config.ts (writeupsPage).
+import Library from '../../layouts/Library.astro';
+import WriteupRow from '../../components/WriteupRow.astro';
+import { getWriteups } from '../../lib/writeups';
+import { writeupsPage } from '../../site.config';
+
+const writeups = await getWriteups();
+const recent = writeups.slice(0, writeupsPage.recentCount);
+---
+
+<Library title={writeupsPage.heading}>
+  <div class="folder-page">
+    <h1 class="page-title">{writeupsPage.heading}</h1>
+    {writeupsPage.intro && <p class="page-subtitle">{writeupsPage.intro}</p>}
+
+    {
+      recent.length === 0 ? (
+        <p class="empty">No write-ups yet.</p>
+      ) : (
+        <>
+          <h2 class="section-title">Most recent</h2>
+          <ul class="row-list">
+            {recent.map((entry) => (
+              <li>
+                <WriteupRow entry={entry} />
+              </li>
+            ))}
+          </ul>
+        </>
+      )
+    }
+  </div>
+</Library>

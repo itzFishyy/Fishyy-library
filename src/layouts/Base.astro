@@ -28,22 +28,6 @@ const pageTitle = title ? `${title} · ${site.title}` : site.title;
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" href="/favicon.ico" />
     <title>{pageTitle}</title>
-    <!-- Picks light or dark before the page is drawn: your saved choice, else the system setting. -->
-    <script is:inline>
-      (function () {
-        var saved = null;
-        try {
-          saved = localStorage.getItem('theme');
-        } catch (e) {}
-        var theme =
-          saved === 'light' || saved === 'dark'
-            ? saved
-            : window.matchMedia('(prefers-color-scheme: dark)').matches
-              ? 'dark'
-              : 'light';
-        document.documentElement.dataset.theme = theme;
-      })();
-    </script>
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>

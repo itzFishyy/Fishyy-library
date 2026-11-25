@@ -5,8 +5,8 @@ import { defineConfig } from 'astro/config';
 export default defineConfig({
   markdown: {
     shikiConfig: {
-      // Code blocks get a light and a dark color scheme; global.css picks one.
-      themes: { light: 'github-light', dark: 'github-dark' },
+      // The color scheme of code blocks. The site has one (dark) theme.
+      theme: 'github-dark',
     },
   },
 });

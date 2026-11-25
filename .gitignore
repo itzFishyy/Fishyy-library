@@ -22,3 +22,7 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# Sample write-ups: any write-up whose file name starts with "sample-" stays
+# on this computer. It shows in the local preview but is never sent to GitHub.
+src/content/writeups/**/sample-*.md

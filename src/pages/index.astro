@@ -2,18 +2,39 @@
 import Base from '../layouts/Base.astro';
 import TerminalCard from '../components/TerminalCard.astro';
 import WriteupRow from '../components/WriteupRow.astro';
-import { getWriteups, groupBySource } from '../lib/writeups';
+import {
+  buildTree,
+  folderUrl,
+  getWriteups,
+  groupByCategory,
+  groupByTag,
+  slugify,
+} from '../lib/writeups';
 import { home, site, terminal } from '../site.config';
+
+/** How many tag buttons show before the "more" button. */
+const TAGS_SHOWN = 12;
 
 const writeups = await getWriteups();
 const latest = writeups[0];
-const groups = groupBySource(writeups);
 const total = writeups.length;
+// The top-level folders, e.g. Competitions and Learning & Practice.
+const shelves = buildTree(writeups).folders;
+
+// Most used first; equal counts in alphabetical order.
+const byCount = (a: { label: string; entries: unknown[] }, b: typeof a) =>
+  b.entries.length - a.entries.length || a.label.localeCompare(b.label);
+const categories = groupByCategory(writeups).sort(byCount);
+const tags = groupByTag(writeups).sort(byCount);
 ---
 
 <Base>
-  <section class:list={['hero', terminal.show ? 'has-terminal' : 'centered']}>
-    <div>
+  <!--
+    First screen: the welcome on the left, the brief introduction on the right.
+    On a narrow screen they stack, welcome first.
+  -->
+  <section class="hero">
+    <div class="hero-welcome">
       {
         home.status && (
           <p class="hero-status">
@@ -22,7 +43,6 @@ const total = writeups.length;
           </p>
         )
       }
-      {home.greeting && <p class="hero-kicker">{home.greeting}</p>}
       <h1>{home.heading}</h1>
       {
         home.roles.length > 0 && (
@@ -34,73 +54,263 @@ const total = writeups.length;
         )
       }
       {home.intro && <p class="hero-intro">{home.intro}</p>}
-
-      <button class="search-trigger" type="button" data-search-open>
-        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-          <circle cx="11" cy="11" r="7"></circle>
-          <path d="M20 20l-3.5-3.5"></path>
-        </svg>
-        <span>Search write-ups, sources, tags…</span>
-        <kbd>Ctrl K</kbd>
-      </button>
-
-      <div class="hero-actions">
-        {
-          total > 0 && (
-            <a class="scroll-hint" href="#writeups">
-              Browse all {total} {total === 1 ? 'write-up' : 'write-ups'} ↓
-            </a>
-          )
-        }
-        {
-          site.links.length > 0 && (
-            <div class="hero-links">
-              {site.links.map((link) => <a href={link.url} rel="noopener">{link.label}</a>)}
-            </div>
-          )
-        }
-      </div>
+      {
+        total > 0 && (
+          <a class="scroll-hint" href="#writeups">
+            Browse all {total} {total === 1 ? 'write-up' : 'write-ups'} ↓
+          </a>
+        )
+      }
     </div>
 
-    {terminal.show && <TerminalCard />}
+    {
+      terminal.show ? (
+        <TerminalCard />
+      ) : (
+        <aside class="me-card" aria-label={`About ${site.author}`}>
+          {home.me.greeting && <p class="me-greeting">{home.me.greeting}</p>}
+          {home.me.lines.map((line) => <p>{line}</p>)}
+          {
+            site.links.length > 0 && (
+              <p class="me-links">
+                {site.links.map((link) => <a href={link.url} rel="noopener">{link.label}</a>)}
+              </p>
+            )
+          }
+          {
+            home.me.more && (
+              <p class="me-more">
+                <a href="/about/">{home.me.more} →</a>
+              </p>
+            )
+          }
+        </aside>
+      )
+    }
   </section>
 
+  <!-- Below: shelves and filter buttons in a side column, the write-ups beside them. -->
   <section id="writeups" class="container">
     {
-      latest && (
-        <div class="featured">
-          <p class="featured-label">Latest write-up</p>
-          <WriteupRow entry={latest} />
-        </div>
+      total === 0 && (
+        <>
+          <h2 class="section-title">Write-ups</h2>
+          <p class="empty">No write-ups yet.</p>
+        </>
       )
     }
 
-    <h2 class="section-title">All write-ups</h2>
-    {total === 0 && <p class="empty">No write-ups yet.</p>}
-
     {
-      groups.map((group) => (
-        <details class="group" open>
-          <summary>
-            {group.label}
-            <span class="count">{group.entries.length}</span>
-          </summary>
-          <ul class="row-list">
-            {group.entries.map((entry) => (
-              <li>
-                <WriteupRow
-                  entry={entry}
-                  showSource={false}
-                  badge={entry.id === latest?.id ? 'Latest' : undefined}
-                />
-              </li>
-            ))}
-          </ul>
-        </details>
-      ))
+      total > 0 && (
+        <div class="home-browse" data-filter>
+          <aside class="home-side" aria-label="Shelves and filters">
+            {/* The heading sits inside the side column so it stays in view with it. */}
+            <h2 class="section-title">Write-ups</h2>
+            {shelves.length > 0 && (
+              <div class="side-block">
+                <h3 class="side-title">Shelves</h3>
+                <ul class="shelf-list">
+                  {shelves.map((shelf) => (
+                    <li>
+                      <a href={folderUrl(shelf.path)}>
+                        {shelf.name}
+                        <span class="count">{shelf.count}</span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            <div class="side-block">
+              <h3 class="side-title">Categories</h3>
+              <div class="chips">
+                {categories.map((category) => (
+                  <button
+                    class="chip"
+                    type="button"
+                    data-category={category.slug}
+                    aria-pressed="false"
+                  >
+                    {category.label}
+                    <span class="count">{category.entries.length}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {tags.length > 0 && (
+              <div class="side-block">
+                <h3 class="side-title">Tags</h3>
+                <div class="chips" data-tag-row>
+                  {tags.map((tag, index) => (
+                    <button
+                      class="chip"
+                      type="button"
+                      data-tag={tag.slug}
+                      data-extra={index >= TAGS_SHOWN ? '' : undefined}
+                      aria-pressed="false"
+                    >
+                      {tag.label}
+                      <span class="count">{tag.entries.length}</span>
+                    </button>
+                  ))}
+                  {tags.length > TAGS_SHOWN && (
+                    <button
+                      class="chip chip-more"
+                      type="button"
+                      data-more-tags
+                      aria-expanded="false"
+                    >
+                      +{tags.length - TAGS_SHOWN} more
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+          </aside>
+
+          <div class="home-main">
+            <p class="filter-status">
+              <span data-filter-count aria-live="polite">
+                {total} {total === 1 ? 'write-up' : 'write-ups'}
+              </span>
+              <button class="filter-clear" type="button" data-filter-clear hidden>
+                Clear filters
+              </button>
+            </p>
+            <ul class="row-list" data-filter-list>
+              {writeups.map((entry) => (
+                <li
+                  data-category={slugify(entry.data.category)}
+                  data-tags={entry.data.tags.map(slugify).join(' ')}
+                >
+                  <WriteupRow entry={entry} badge={entry.id === latest?.id ? 'Latest' : undefined} />
+                </li>
+              ))}
+            </ul>
+            <p class="empty" data-filter-empty hidden>
+              No write-ups match these filters.
+            </p>
+          </div>
+        </div>
+      )
     }
   </section>
 </Base>
+
+<script>
+  // The category and tag buttons beside the list. One category at a time, any
+  // number of tags; a write-up must match all of them to stay in the list.
+  // The choice is kept in the address (/?category=web&tag=jwt) so it can be
+  // shared and survives a reload.
+  const filter = document.querySelector<HTMLElement>('[data-filter]');
+  const list = document.querySelector<HTMLElement>('[data-filter-list]');
+
+  if (filter && list) {
+    const items = [...list.querySelectorAll<HTMLElement>(':scope > li')];
+    const categoryButtons = [...filter.querySelectorAll<HTMLElement>('button[data-category]')];
+    const tagButtons = [...filter.querySelectorAll<HTMLElement>('button[data-tag]')];
+    const tagRow = filter.querySelector<HTMLElement>('[data-tag-row]');
+    const more = filter.querySelector<HTMLElement>('[data-more-tags]');
+    const count = filter.querySelector<HTMLElement>('[data-filter-count]')!;
+    const clear = filter.querySelector<HTMLElement>('[data-filter-clear]')!;
+    const empty = filter.querySelector<HTMLElement>('[data-filter-empty]')!;
+    const total = items.length;
+
+    const knownCategories = new Set(categoryButtons.map((button) => button.dataset.category!));
+    const knownTags = new Set(tagButtons.map((button) => button.dataset.tag!));
+
+    let category = '';
+    const tags = new Set<string>();
+
+    const showAllTags = () => {
+      tagRow?.setAttribute('data-open', '');
+      more?.setAttribute('aria-expanded', 'true');
+      more?.setAttribute('hidden', '');
+    };
+
+    function apply(updateAddress = true) {
+      let shown = 0;
+      for (const item of items) {
+        const itemTags = (item.dataset.tags ?? '').split(' ');
+        const match =
+          (!category || item.dataset.category === category) &&
+          [...tags].every((tag) => itemTags.includes(tag));
+        item.hidden = !match;
+        if (match) shown += 1;
+      }
+
+      for (const button of categoryButtons) {
+        button.setAttribute('aria-pressed', String(button.dataset.category === category));
+      }
+      for (const button of tagButtons) {
+        const pressed = tags.has(button.dataset.tag!);
+        button.setAttribute('aria-pressed', String(pressed));
+        // A chosen tag must be visible, even if it sits behind "more".
+        if (pressed && button.hasAttribute('data-extra')) showAllTags();
+      }
+
+      const active = Boolean(category) || tags.size > 0;
+      const noun = total === 1 ? 'write-up' : 'write-ups';
+      count.textContent = active ? `${shown} of ${total} ${noun}` : `${total} ${noun}`;
+      clear.hidden = !active;
+      empty.hidden = shown > 0;
+
+      if (updateAddress) {
+        const params = new URLSearchParams();
+        if (category) params.set('category', category);
+        for (const tag of tags) params.append('tag', tag);
+        const query = params.toString();
+        history.replaceState(null, '', query ? `/?${query}` : '/');
+      }
+    }
+
+    /** Reads a choice out of an address such as /?category=web&tag=jwt. */
+    function readAddress(search: string) {
+      const params = new URLSearchParams(search);
+      const wanted = params.get('category') ?? '';
+      category = knownCategories.has(wanted) ? wanted : '';
+      tags.clear();
+      for (const tag of params.getAll('tag')) if (knownTags.has(tag)) tags.add(tag);
+    }
+
+    filter.addEventListener('click', (event) => {
+      const button = (event.target as Element).closest<HTMLElement>('button');
+      if (!button) return;
+      if (button.dataset.category) {
+        category = category === button.dataset.category ? '' : button.dataset.category;
+      } else if (button.dataset.tag) {
+        if (!tags.delete(button.dataset.tag)) tags.add(button.dataset.tag);
+      } else if (button === more) {
+        showAllTags();
+        return;
+      } else if (button === clear) {
+        category = '';
+        tags.clear();
+      } else {
+        return;
+      }
+      apply();
+    });
+
+    // A category or tag link inside the page (on a write-up's row) filters
+    // the list in place instead of loading the page again.
+    document.addEventListener('click', (event) => {
+      if (event.defaultPrevented || event.button !== 0) return;
+      if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+      const link = (event.target as Element).closest<HTMLAnchorElement>('a[href^="/?"]');
+      if (!link) return;
+      event.preventDefault();
+      readAddress(new URL(link.href).search);
+      apply();
+      document.querySelector('#writeups')?.scrollIntoView();
+    });
+
+    readAddress(window.location.search);
+    apply(false);
+  }
+</script>
 
 <script>
   const typed = document.querySelector<HTMLElement>('[data-typed]');

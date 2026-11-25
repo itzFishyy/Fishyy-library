@@ -1,15 +1,18 @@
 ---
-// The full page for one write-up.
+// One write-up on the Writeups page: folder list on the left, the write-up
+// in the middle and its contents list on the right.
 import { render } from 'astro:content';
-import Base from '../layouts/Base.astro';
+import Library from '../layouts/Library.astro';
+import FolderPath from './FolderPath.astro';
 import WriteupRow from './WriteupRow.astro';
 import {
   type Writeup,
   categoryUrl,
+  foldersOf,
   formatDate,
   readingTime,
-  sourceUrl,
   tagUrl,
+  writeupSlug,
   writeupUrl,
 } from '../lib/writeups';
 
@@ -21,16 +24,22 @@ interface Props {
 }
 
 const { entry, newer, older, related } = Astro.props;
-const { title, source, category, tags, date, difficulty, description, draft } = entry.data;
+const { title, category, tags, date, difficulty, description, draft } = entry.data;
 const { Content, headings } = await render(entry);
 const toc = headings.filter((heading) => heading.depth === 2 || heading.depth === 3);
+const folders = foldersOf(entry);
 ---
 
-<Base title={title} description={description}>
-  <div class:list={['container', 'post', { 'has-toc': toc.length > 0 }]}>
+<Library
+  title={title}
+  description={description}
+  currentSlug={writeupSlug(entry)}
+  openPath={folders.at(-1)?.path}
+>
+  <div class:list={['post', { 'has-toc': toc.length > 0 }]}>
     {
       toc.length > 0 && (
-        <nav class="toc" aria-label="Table of contents">
+        <nav class="toc toc-side" aria-label="Table of contents">
           <p class="toc-title">Contents</p>
           <ol>
             {toc.map((heading) => (
@@ -45,17 +54,15 @@ const toc = headings.filter((heading) => heading.depth === 2 || heading.depth ==
 
     <article>
       <header class="post-header">
-        <p class="meta">
-          <a href={sourceUrl(source)}>{source}</a>
-          <a href={categoryUrl(category)}>{category}</a>
-          {difficulty && <span>{difficulty}</span>}
-        </p>
+        <FolderPath folders={folders} />
         <h1>
           {title}
           {draft && <span class="badge">Draft</span>}
         </h1>
         <p class="meta">
           <time datetime={date.toISOString()}>{formatDate(date)}</time>
+          <a href={categoryUrl(category)}>{category}</a>
+          {difficulty && <span>{difficulty}</span>}
           <span>{readingTime(entry)}</span>
         </p>
         {
@@ -72,6 +79,22 @@ const toc = headings.filter((heading) => heading.depth === 2 || heading.depth ==
           )
         }
       </header>
+
+      {
+        // The same contents list, folded into a box, for screens too narrow for a third column.
+        toc.length > 0 && (
+          <details class="toc toc-inline">
+            <summary class="toc-title">Contents</summary>
+            <ol>
+              {toc.map((heading) => (
+                <li class={`depth-${heading.depth}`}>
+                  <a href={`#${heading.slug}`}>{heading.text}</a>
+                </li>
+              ))}
+            </ol>
+          </details>
+        )
+      }
 
       <div class="prose">
         <Content />
@@ -114,4 +137,4 @@ const toc = headings.filter((heading) => heading.depth === 2 || heading.depth ==
       }
     </article>
   </div>
-</Base>
+</Library>

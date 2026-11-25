@@ -2,12 +2,20 @@
 import type { GetStaticPaths } from 'astro';
 import Base from '../../layouts/Base.astro';
 import WriteupPage from '../../components/WriteupPage.astro';
-import { type Writeup, getHiddenDrafts, getRelated, getWriteups } from '../../lib/writeups';
+import {
+  type Writeup,
+  getHiddenDrafts,
+  getRelated,
+  getWriteups,
+  writeupSlug,
+} from '../../lib/writeups';
 
+// The address comes from the file name alone, so moving a write-up to
+// another folder does not change its link.
 export const getStaticPaths = (async () => {
   const writeups = await getWriteups();
   const published = writeups.map((entry, index) => ({
-    params: { slug: entry.id },
+    params: { slug: writeupSlug(entry) },
     props: {
       entry,
       hidden: false,
@@ -18,7 +26,7 @@ export const getStaticPaths = (async () => {
   }));
   // Hidden drafts keep their address but show only a notice (see getHiddenDrafts).
   const hidden = (await getHiddenDrafts()).map((entry) => ({
-    params: { slug: entry.id },
+    params: { slug: writeupSlug(entry) },
     props: {
       entry,
       hidden: true,

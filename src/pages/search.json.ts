@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { formatDate, getWriteups, writeupUrl } from '../lib/writeups';
+import { foldersOf, formatDate, getWriteups, writeupUrl } from '../lib/writeups';
 
 /** How much of each write-up's text is searchable. */
 const MAX_TEXT_LENGTH = 20_000;
@@ -12,8 +12,10 @@ export const GET: APIRoute = async () => {
     url: writeupUrl(entry),
     date: entry.data.date.toISOString(),
     dateText: formatDate(entry.data.date),
-    type: entry.data.type,
-    source: entry.data.source,
+    // The folders it is saved in, e.g. "Competitions / CSCTF 2026".
+    source: foldersOf(entry)
+      .map((folder) => folder.name)
+      .join(' / '),
     category: entry.data.category,
     tags: entry.data.tags,
     description: entry.data.description ?? '',

@@ -1,0 +1,25 @@
+---
+// The line showing where something sits: Competitions ▸ CSCTF 2026.
+// Each part opens that folder on the Writeups page.
+import { type FolderRef, folderUrl } from '../lib/writeups';
+
+interface Props {
+  folders: FolderRef[];
+}
+
+const { folders } = Astro.props;
+---
+
+{
+  folders.length > 0 && (
+    <nav class="folder-path" aria-label="Folder">
+      <ol>
+        {folders.map((folder) => (
+          <li>
+            <a href={folderUrl(folder.path)}>{folder.name}</a>
+          </li>
+        ))}
+      </ol>
+    </nav>
+  )
+}

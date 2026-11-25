@@ -2,33 +2,36 @@
 import {
   type Writeup,
   categoryUrl,
+  folderUrl,
   formatDate,
-  sourceUrl,
+  sourceOf,
   tagUrl,
   writeupUrl,
 } from '../lib/writeups';
 
 interface Props {
   entry: Writeup;
-  /** Hide the source when the surrounding list is already grouped by source. */
+  /** Hide the folder name when the surrounding list is already about one folder. */
   showSource?: boolean;
   /** Small label next to the title, e.g. "Latest". */
   badge?: string;
 }
 
 const { entry, showSource = true, badge } = Astro.props;
-const { title, source, category, tags, date, difficulty, description } = entry.data;
+const { title, category, tags, date, difficulty, description, draft } = entry.data;
+const source = sourceOf(entry);
 ---
 
 <article class="row">
   <h3 class="row-title">
     <a href={writeupUrl(entry)}>{title}</a>
     {badge && <span class="badge">{badge}</span>}
+    {draft && <span class="badge">Draft</span>}
   </h3>
   {description && <p class="row-desc muted">{description}</p>}
   <p class="meta">
     <time datetime={date.toISOString()}>{formatDate(date)}</time>
-    {showSource && <a href={sourceUrl(source)}>{source}</a>}
+    {showSource && source && <a href={folderUrl(source.path)}>{source.label}</a>}
     <a href={categoryUrl(category)}>{category}</a>
     {difficulty && <span>{difficulty}</span>}
   </p>
