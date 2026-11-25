@@ -35,8 +35,7 @@ export const home = {
   /** The small pill above the heading, e.g. 'Currently playing CTFs'. Empty = hidden. */
   status: '',
   /** The big heading. */
-  heading: "Welcome to",
-  heading: "Fishyy's library",
+  heading: "Welcome to Fishyy's library",
   /**
    * Typed out one after another under the heading,
    * e.g. ['CTF Player', 'Write-up Collector']. Empty = hidden.
