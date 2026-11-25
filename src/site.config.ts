@@ -43,7 +43,7 @@ export const home = {
   roles: [] as string[],
   /** One or two sentences about the site, under the heading. Empty = hidden. */
   intro:
-    'This site is underconstruction!.',
+    'This site is underconstruction!',
 
   /**
    * The brief introduction of yourself (the tag on the fishing hook in the
