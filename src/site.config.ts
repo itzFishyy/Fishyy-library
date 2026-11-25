@@ -11,8 +11,8 @@ export const site = {
 
   /** Paragraphs shown on the About page. Add, remove or rewrite freely. */
   about: [
-    "Hi, I'm Fishyy. I play CTFs and keep my write-ups here, so I can find them again and so others can learn from them.",
-    'Write-ups are published only after the CTF has ended.',
+    "Hi, I'm Fishyy.",
+    'Write-ups will be published later!',
   ],
 
   /**
@@ -43,7 +43,7 @@ export const home = {
   roles: [] as string[],
   /** One or two sentences about the site, under the heading. Empty = hidden. */
   intro:
-    'This site is underconstruction!',
+    'This site is under construction!',
 
   /**
    * The brief introduction of yourself (the tag on the fishing hook in the
@@ -55,7 +55,7 @@ export const home = {
     /** A few short lines, one paragraph each. */
     lines: ["I'm Fishyy. I play CTFs and keep my write-ups in this library."],
     /** The link to the About page under it. Empty = hidden. */
-    more: 'More about me',
+    more: 'About me',
   },
 };
 
